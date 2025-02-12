@@ -1,4 +1,4 @@
-"use client";
+"use client"
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaHeart, FaShoppingCart } from "react-icons/fa"; // Remove FaRegHeart if not used

@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FaRegHeart, FaHeart, FaShoppingCart } from "react-icons/fa";
+import { FaHeart, FaShoppingCart } from "react-icons/fa"; // Removed FaRegHeart
 import { useCart } from "../app/context/cartContext"; // Using CartContext for Cart functionality
 
 const Navbar = () => {
@@ -19,18 +19,18 @@ const Navbar = () => {
   // Calculate total items in the cart
   const totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
 
-  // Handle Wishlist toggle
-  const handleWishlistToggle = (productId: string) => {
-    setWishlist((prevWishlist) => {
-      const updatedWishlist = new Set(prevWishlist);
-      if (updatedWishlist.has(productId)) {
-        updatedWishlist.delete(productId);
-      } else {
-        updatedWishlist.add(productId);
-      }
-      return updatedWishlist;
-    });
-  };
+  // If you still want to use handleWishlistToggle, you can implement it as follows:
+  // const handleWishlistToggle = (productId: string) => {
+  //   setWishlist((prevWishlist) => {
+  //     const updatedWishlist = new Set(prevWishlist);
+  //     if (updatedWishlist.has(productId)) {
+  //       updatedWishlist.delete(productId);
+  //     } else {
+  //       updatedWishlist.add(productId);
+  //     }
+  //     return updatedWishlist;
+  //   });
+  // };
 
   useEffect(() => {
     // Save wishlist to local storage whenever it changes

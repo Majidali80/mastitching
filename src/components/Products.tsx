@@ -1,11 +1,12 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import sanityClient, { client, urlFor } from "../sanity/lib/client";
+import { client, urlFor } from "../sanity/lib/client"; // Removed sanityClient
 import { allProductsQuery } from "../sanity/lib/queries";
 import { Product } from "../app/utils/types";
 import { FaRegHeart, FaHeart, FaShoppingCart } from "react-icons/fa";
 import { useCart } from "../app/context/cartContext";
+import Image from "next/image"; // Import Image component from Next.js
 
 const BestSelling = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -34,7 +35,7 @@ const BestSelling = () => {
     }
   }, [wishlist]);
 
-  const { cart, addToCart, updateQuantity, removeFromCart } = useCart();
+  const { cart, addToCart } = useCart(); // Removed updateQuantity and removeFromCart
 
   const totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
 
@@ -93,9 +94,11 @@ const BestSelling = () => {
                 <h2 className="text-lg font-bold mb-2">{product.title}</h2>
                 {product.image ? (
                   <div className="relative">
-                    <img
+                    <Image
                       src={urlFor(product.image).url()}
                       alt={product.title}
+                      width={500} // Add width and height for optimization
+                      height={300}
                       className="w-full h-48 object-cover mb-2"
                     />
                     {/* Discount Badge */}

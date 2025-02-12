@@ -1,7 +1,5 @@
 // src/types/product.ts
 
-import { StaticImageData } from "next/image";
-
 export interface Product {
   discount(price: number, discount: number): unknown;
   _id: string;

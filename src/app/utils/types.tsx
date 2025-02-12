@@ -3,7 +3,7 @@
 import { StaticImageData } from "next/image";
 
 export interface Product {
-  discount(price: number, discount: any): unknown;
+  discount(price: number, discount: number): unknown;
   _id: string;
   productName: string;
   title:string;

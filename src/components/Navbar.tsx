@@ -1,6 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaHeart, FaShoppingCart } from "react-icons/fa"; // Removed FaRegHeart
 import { useCart } from "../app/context/cartContext"; // Using CartContext for Cart functionality

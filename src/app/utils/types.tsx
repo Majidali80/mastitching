@@ -36,12 +36,11 @@ export interface Product {
 export type cart = {
   id: number;
   title: string;
-  image: string | { url: string }; 
+  image: { asset: { url: string } };  // Matching structure with Product type
   slug: string;
   price: number;
   category: string;
   size: string;
   quantity: number;
   discount?: number;
-  
 };

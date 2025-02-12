@@ -1,25 +1,24 @@
-"use client"; // Ensure this file is a client component
-
+"use client"
 import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
-import { useRouter } from 'next/navigation'; // Correct import for useRouter
-import { useCart } from '../context/cartContext'; // Import the context
-import Swal from "sweetalert2"; // Import SweetAlert2
-import { urlFor } from "../../sanity/lib/client"; // Assuming the urlFor function is available
+import { useRouter } from 'next/navigation';
+import { useCart } from '../context/cartContext';
+import Swal from "sweetalert2"; 
+import { urlFor } from "../../sanity/lib/client"; 
+import Image from 'next/image'; // Import Image component from next/image
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
   const [note, setNote] = useState('');
-
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
-    setIsClient(true); // Ensure the component is client-side
+    setIsClient(true);
   }, []);
 
   if (!isClient) {
-    return <div>Loading...</div>; // Provide a fallback while waiting for hydration
+    return <div>Loading...</div>;
   }
 
   const calculateTotal = () => {
@@ -29,7 +28,6 @@ export default function Cart() {
     }, 0);
   };
 
-  // Updated handleCheckout function with Swal.fire
   const handleCheckout = () => {
     Swal.fire({
       title: 'Proceed to Checkout?',
@@ -41,7 +39,7 @@ export default function Cart() {
       confirmButtonText: 'Yes, Proceed!',
     }).then((result) => {
       if (result.isConfirmed) {
-        router.push('/Checkout'); // Navigate to the checkout page
+        router.push('/Checkout');
       }
     });
   };
@@ -55,7 +53,6 @@ export default function Cart() {
       </Head>
 
       <main className="container mx-auto p-6 mt-16 bg-[#fafafa]">
-        {/* Left: NOTE Section */}
         <div className="flex gap-10">
           <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Special Instructions</h2>
@@ -68,7 +65,6 @@ export default function Cart() {
             />
           </div>
 
-          {/* Right: Cart Summary */}
           <div className="w-full md:w-2/3 bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>
             <div className="space-y-6">
@@ -76,10 +72,12 @@ export default function Cart() {
                 <div key={item._id} className="flex items-center justify-between border-b pb-4 mb-4">
                   <div className="flex items-center space-x-4">
                     {item.image ? (
-                      <img
+                      <Image
                         src={urlFor(item.image).url()}
                         alt={item.title}
-                        className="w-20 h-20 object-cover rounded-md"
+                        width={80} // Specify width
+                        height={80} // Specify height
+                        className="object-cover rounded-md"
                       />
                     ) : (
                       <div className="w-20 h-20 bg-gray-200 flex justify-center items-center rounded-md">
@@ -123,7 +121,6 @@ export default function Cart() {
               ))}
             </div>
 
-            {/* Total */}
             <div className="flex justify-between items-center border-t pt-6">
               <span className="text-lg font-semibold text-gray-800">Total:</span>
               <span className="text-xl font-bold text-blue-600">
@@ -131,7 +128,6 @@ export default function Cart() {
               </span>
             </div>
 
-            {/* Checkout */}
             <div className="mt-10">
               <button
                 onClick={handleCheckout}

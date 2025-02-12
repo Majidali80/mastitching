@@ -8,6 +8,7 @@ import Swal from "sweetalert2";
 import { urlFor } from "../../sanity/lib/client"; 
 import Image from 'next/image'; // Import Image component from next/image
 
+
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();

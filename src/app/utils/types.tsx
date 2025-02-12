@@ -36,7 +36,7 @@ export interface Product {
 export type cart = {
   id: number;
   title: string;
-  image?: string | { url: string }; 
+  image: string | { url: string }; 
   slug: string;
   price: number;
   category: string;

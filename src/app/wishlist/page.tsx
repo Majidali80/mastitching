@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FaRegHeart, FaHeart, FaShoppingCart } from "react-icons/fa";
+import { FaHeart, FaShoppingCart } from "react-icons/fa"; // Remove FaRegHeart if not used
+import Image from "next/image"; // Import Image component
 import { useCart } from "../context/cartContext"; // Import Cart Context to interact with cart
 import sanityClient, { urlFor } from "../../sanity/lib/client";
 import { Product } from "../utils/types"; // Import Product type
@@ -66,9 +67,11 @@ const Wishlist = () => {
               <div key={product._id} className="relative bg-white rounded shadow p-4 cursor-pointer">
                 <Link href={`/products/${product.slug.current}`}>
                   {product.image ? (
-                    <img
+                    <Image
                       src={urlFor(product.image).url()}
                       alt={product.title}
+                      width={300} // Add width
+                      height={200} // Add height
                       className="w-full h-48 object-cover mb-2"
                     />
                   ) : (

@@ -4,10 +4,10 @@ import React, { useState, useEffect } from 'react';
 import Head from 'next/head';
 import { useRouter } from 'next/navigation';
 import { useCart } from '../context/cartContext';
-import Swal from "sweetalert2"; 
-import { urlFor } from "../../sanity/lib/client"; 
-import Image from 'next/image'; // Import Image component from next/image
-
+import Swal from "sweetalert2";
+import { urlFor } from "../../sanity/lib/client";
+import Image from 'next/image';
+import { FaStickyNote, FaTruck } from 'react-icons/fa'; // Icons for styling
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
@@ -29,6 +29,24 @@ export default function Cart() {
       return total + discountedPrice * item.quantity;
     }, 0);
   };
+
+  const estimateShipping = () => {
+    const originalTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
+  
+    // Shipping rules
+    if (originalTotal >= 10000) {
+      return 0; // Free shipping for orders above or equal to 10,000 PKR
+    } else if (originalTotal >= 9001) {
+      return 700; // Shipping is 700 for orders between 6001 and 9999 PKR
+    } else if (originalTotal >= 7001) {
+      return 500; // Shipping is 500 for orders between 3001 and 6000 PKR
+    } else if (originalTotal >= 1) {
+      return 250; // Shipping is 250 for orders between 1 and 3000 PKR
+    }
+    
+    return 0; // Default to 0 if no matching condition
+  };
+  
 
   const handleCheckout = () => {
     Swal.fire({
@@ -56,8 +74,11 @@ export default function Cart() {
 
       <main className="container mx-auto p-6 mt-16 bg-[#fafafa]">
         <div className="flex gap-10">
+          {/* Order Notes Section */}
           <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">Special Instructions</h2>
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+              <FaStickyNote /> Add Order Note
+            </h2>
             <textarea
               value={note}
               onChange={(e) => setNote(e.target.value)}
@@ -65,8 +86,15 @@ export default function Cart() {
               className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
               rows={5}
             />
+            {note && (
+              <div className="mt-4 p-3 bg-gray-100 rounded-lg">
+                <h3 className="text-lg font-medium">Your Note:</h3>
+                <p className="text-gray-700">{note}</p>
+              </div>
+            )}
           </div>
 
+          {/* Order Summary Section */}
           <div className="w-full md:w-2/3 bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>
             <div className="space-y-6">
@@ -77,8 +105,8 @@ export default function Cart() {
                       <Image
                         src={urlFor(item.image).url()}
                         alt={item.title}
-                        width={80} // Specify width
-                        height={80} // Specify height
+                        width={80}
+                        height={80}
                         className="object-cover rounded-md"
                       />
                     ) : (
@@ -92,12 +120,8 @@ export default function Cart() {
                     </div>
                   </div>
                   <div className="text-right">
-                    <p className="text-sm text-gray-500 line-through">
-                      ${(item.price * item.quantity).toFixed(2)}
-                    </p>
-                    <p className="text-lg font-semibold text-blue-600">
-                      ${(item.price * 0.9 * item.quantity).toFixed(2)}
-                    </p>
+                    <p className="text-sm text-gray-500 line-through">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                    <p className="text-lg font-semibold text-blue-600">Rs. {(item.price * 0.9 * item.quantity).toFixed(2)}</p>
                   </div>
                   <div className="flex gap-2">
                     <button
@@ -123,10 +147,18 @@ export default function Cart() {
               ))}
             </div>
 
+            {/* Summary and Shipping Estimate */}
+            <div className="mt-8 p-4 border rounded-lg">
+              <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <FaTruck /> Estimate Shipping
+              </h3>
+              <p className="text-gray-700">Shipping Fee: {estimateShipping() === 0 ? 'Free Shipping' : `Rs. ${estimateShipping()}`}</p>
+            </div>
+
             <div className="flex justify-between items-center border-t pt-6">
               <span className="text-lg font-semibold text-gray-800">Total:</span>
               <span className="text-xl font-bold text-blue-600">
-                ${calculateTotal().toFixed(2)}
+                Rs. {(calculateTotal() + estimateShipping()).toFixed(2)}
               </span>
             </div>
 
@@ -143,4 +175,4 @@ export default function Cart() {
       </main>
     </div>
   );
-}
+} 

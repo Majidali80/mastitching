@@ -7,21 +7,26 @@ import { useCart } from '../context/cartContext';
 import Swal from "sweetalert2";
 import { urlFor } from "../../sanity/lib/client";
 import Image from 'next/image';
-import { FaStickyNote, FaTruck } from 'react-icons/fa'; // Icons for styling
+import { FaTruck, FaGift, FaShareAlt } from 'react-icons/fa';
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
-  const [note, setNote] = useState('');
-  const [isClient, setIsClient] = useState(false);
+  const [promoCode, setPromoCode] = useState('');
+  const [discount, setDiscount] = useState(0);
+  const [flashSaleTimeLeft, setFlashSaleTimeLeft] = useState(60); // in minutes
+  const [progress, setProgress] = useState(0); // Progress bar for progressive discounts
 
   useEffect(() => {
-    setIsClient(true);
-  }, []);
+    // Flash Sale Timer
+    const timer = setInterval(() => {
+      if (flashSaleTimeLeft > 0) {
+        setFlashSaleTimeLeft(flashSaleTimeLeft - 1);
+      }
+    }, 60000); // Decrease every minute
 
-  if (!isClient) {
-    return <div>Loading...</div>;
-  }
+    return () => clearInterval(timer);
+  }, [flashSaleTimeLeft]);
 
   const calculateTotal = () => {
     return cart.reduce((total, item) => {
@@ -32,21 +37,16 @@ export default function Cart() {
 
   const estimateShipping = () => {
     const originalTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-  
-    // Shipping rules
-    if (originalTotal >= 10000) {
-      return 0; // Free shipping for orders above or equal to 10,000 PKR
-    } else if (originalTotal >= 9001) {
-      return 700; // Shipping is 700 for orders between 6001 and 9999 PKR
-    } else if (originalTotal >= 7001) {
-      return 500; // Shipping is 500 for orders between 3001 and 6000 PKR
-    } else if (originalTotal >= 1) {
-      return 250; // Shipping is 250 for orders between 1 and 3000 PKR
-    }
-    
-    return 0; // Default to 0 if no matching condition
+    return originalTotal >= 10000 ? 0 : originalTotal >= 7000 ? 500 : 250;
   };
-  
+
+  const applyPromoCode = () => {
+    if (promoCode === 'DISCOUNT10') {
+      setDiscount(0.1); // 10% off
+    } else {
+      setDiscount(0);
+    }
+  };
 
   const handleCheckout = () => {
     Swal.fire({
@@ -64,6 +64,37 @@ export default function Cart() {
     });
   };
 
+  // Progressive Discounts (Buy more, save more)
+  const progressiveDiscount = () => {
+    const totalAmount = calculateTotal();
+    if (totalAmount >= 4000) return 0.15; // 15% discount
+    if (totalAmount >= 2000) return 0.10; // 10% discount
+    return 0; // No discount
+  };
+
+  // Calculate progress bar for progressive discount
+  const calculateProgress = () => {
+    const totalAmount = calculateTotal();
+    if (totalAmount >= 4000) return 100;
+    if (totalAmount >= 2000) return 50;
+    return 0;
+  };
+
+  // Social media sharing
+  const shareCart = () => {
+    const cartUrl = window.location.href; // Share current cart page URL
+    const text = `Check out my cart: ${cartUrl}`;
+    const shareUrl = `https://twitter.com/share?text=${encodeURIComponent(text)}`;
+    window.open(shareUrl, '_blank');
+  };
+
+  // Example Product Recommendations (Cross-selling & Upselling)
+  const recommendedProducts = [
+    { id: 1, title: "Product A", price: 500, image: "/images/product-a.jpg" },
+    { id: 2, title: "Product B", price: 1500, image: "/images/product-b.jpg" },
+    { id: 3, title: "Product C", price: 2500, image: "/images/product-c.jpg" },
+  ];
+
   return (
     <div>
       <Head>
@@ -74,26 +105,6 @@ export default function Cart() {
 
       <main className="container mx-auto p-6 mt-16 bg-[#fafafa]">
         <div className="flex gap-10">
-          {/* Order Notes Section */}
-          <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
-              <FaStickyNote /> Add Order Note
-            </h2>
-            <textarea
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-              placeholder="Add special instructions for your order..."
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              rows={5}
-            />
-            {note && (
-              <div className="mt-4 p-3 bg-gray-100 rounded-lg">
-                <h3 className="text-lg font-medium">Your Note:</h3>
-                <p className="text-gray-700">{note}</p>
-              </div>
-            )}
-          </div>
-
           {/* Order Summary Section */}
           <div className="w-full md:w-2/3 bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>
@@ -147,18 +158,63 @@ export default function Cart() {
               ))}
             </div>
 
-            {/* Summary and Shipping Estimate */}
-            <div className="mt-8 p-4 border rounded-lg">
+            {/* Promo Code Section */}
+            <div className="mt-6">
+              <input
+                type="text"
+                placeholder="Enter Promo Code"
+                value={promoCode}
+                onChange={(e) => setPromoCode(e.target.value)}
+                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              />
+              <button
+                onClick={applyPromoCode}
+                className="mt-2 w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+              >
+                Apply Promo Code
+              </button>
+              {discount > 0 && (
+                <div className="mt-4 text-green-500 font-semibold">
+                  Promo Applied: {discount * 100}% Off
+                </div>
+              )}
+            </div>
+
+            {/* Progressive Discount Section */}
+            <div className="mt-6 p-4 bg-blue-100 rounded-lg">
+              <h3 className="text-lg font-semibold text-blue-700">Progressive Discount</h3>
+              <p className="text-gray-700">Spend more to unlock discounts:</p>
+              <div className="flex justify-between items-center mt-2">
+                <div>Spend Rs. 2000 to unlock 10% off</div>
+                <div>Spend Rs. 4000 to unlock 15% off</div>
+              </div>
+              <div className="mt-4">
+                <div className="text-gray-700">Your Progress:</div>
+                <div className="h-2 bg-gray-300 rounded-full mt-2">
+                  <div
+                    style={{ width: `${calculateProgress()}%` }}
+                    className="h-2 bg-green-500 rounded-full"
+                  />
+                </div>
+                <div className="text-sm text-gray-600 mt-2">{calculateProgress()}% to the next discount</div>
+              </div>
+            </div>
+
+            {/* Shipping Estimate */}
+            <div className="mt-6 p-4 border rounded-lg">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
                 <FaTruck /> Estimate Shipping
               </h3>
               <p className="text-gray-700">Shipping Fee: {estimateShipping() === 0 ? 'Free Shipping' : `Rs. ${estimateShipping()}`}</p>
             </div>
 
+            {/* Total */}
             <div className="flex justify-between items-center border-t pt-6">
               <span className="text-lg font-semibold text-gray-800">Total:</span>
               <span className="text-xl font-bold text-blue-600">
-                Rs. {(calculateTotal() + estimateShipping()).toFixed(2)}
+                Rs. {(
+                  calculateTotal() * (1 - discount) + estimateShipping()
+                ).toFixed(2)}
               </span>
             </div>
 
@@ -171,8 +227,40 @@ export default function Cart() {
               </button>
             </div>
           </div>
+
+          {/* Product Recommendations */}
+          <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
+            <h2 className="text-2xl font-semibold text-gray-800 mb-4">You May Also Like</h2>
+            <div className="space-y-4">
+              {recommendedProducts.map((product) => (
+                <div key={product.id} className="flex items-center gap-4 border-b pb-4 mb-4">
+                  <Image
+                    src={product.image}
+                    alt={product.title}
+                    width={80}
+                    height={80}
+                    className="object-cover rounded-md"
+                  />
+                  <div>
+                    <h3 className="text-lg font-medium text-gray-800">{product.title}</h3>
+                    <p className="text-sm text-gray-500">Rs. {product.price}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Social Media Sharing */}
+        <div className="mt-6 flex justify-center">
+          <button
+            onClick={shareCart}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center gap-2"
+          >
+            <FaShareAlt /> Share Cart
+          </button>
         </div>
       </main>
     </div>
   );
-} 
+}

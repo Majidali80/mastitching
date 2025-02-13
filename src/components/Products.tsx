@@ -1,7 +1,7 @@
 "use client";
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { client, urlFor } from "../sanity/lib/client"; // Removed sanityClient
+import { client, urlFor } from "../sanity/lib/client";
 import { allProductsQuery } from "../sanity/lib/queries";
 import { Product } from "../app/utils/types";
 import { FaRegHeart, FaHeart, FaShoppingCart } from "react-icons/fa";
@@ -35,7 +35,7 @@ const BestSelling = () => {
     }
   }, [wishlist]);
 
-  const { cart, addToCart } = useCart(); // Removed updateQuantity and removeFromCart
+  const { cart, addToCart } = useCart();
 
   const totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
 
@@ -65,12 +65,6 @@ const BestSelling = () => {
     setTimeout(() => setNotification(null), 3000); // Hide notification after 3 seconds
   };
 
-  // Calculate discounted price (assuming a 10% discount for the example)
-  const getDiscountedPrice = (price: number) => price * 0.9; // 10% discount
-  const getDiscountPercentage = (price: number, discountedPrice: number) => {
-    return Math.round(((price - discountedPrice) / price) * 100); // Calculate the percentage of discount
-  };
-
   return (
     <div className="mb-[100px] mt-[100px] overflow-hidden">
       <div className="container px-5 mx-auto">
@@ -85,8 +79,11 @@ const BestSelling = () => {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => {
-          const discountedPrice = getDiscountedPrice(product.price);
-          const discountPercentage = getDiscountPercentage(product.price, discountedPrice);
+          // Get the discount percentage from Sanity
+          const discountPercentage = product.discount || 0; // Default to 0 if no discount
+          
+          // Calculate the discounted price
+          const discountedPrice = product.price * (1 - discountPercentage / 100);
 
           return (
             <div key={product._id} className="relative bg-white rounded shadow-lg p-4 cursor-pointer hover:shadow-2xl transition-shadow">
@@ -97,7 +94,7 @@ const BestSelling = () => {
                     <Image
                       src={urlFor(product.image).url()}
                       alt={product.title}
-                      width={500} // Add width and height for optimization
+                      width={500}
                       height={300}
                       className="w-full h-48 object-cover mb-2"
                     />
@@ -111,10 +108,14 @@ const BestSelling = () => {
                 )}
 
                 {/* Display original and discounted prices */}
-                <p className="text-gray-900 font-bold mb-4">
-                  <span className="line-through text-gray-500">PKR {product.price}</span>
-                  <span className="ml-2 text-red-500">PKR {discountedPrice.toFixed(2)}</span>
-                </p>
+                <div className="flex justify-between items-center">
+                  <p className="text-gray-900 font-bold">
+                    <span className="line-through text-gray-500">PKR {product.price}</span>
+                  </p>
+                  <p className="text-red-500 font-bold">
+                    PKR {discountedPrice.toFixed(2)}
+                  </p>
+                </div>
               </Link>
 
               {/* Buttons Section - Add to Wishlist & Add to Cart */}

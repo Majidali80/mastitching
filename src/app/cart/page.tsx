@@ -28,9 +28,15 @@ export default function Cart() {
     return () => clearInterval(timer);
   }, [flashSaleTimeLeft]);
 
+  // Function to get the discounted price for an item
+  const getDiscountedPrice = (price: number, discountPercentage: number) => {
+    return price - (price * (discountPercentage / 100));
+  };
+
+  // Calculate total with dynamic discount percentage
   const calculateTotal = () => {
     return cart.reduce((total, item) => {
-      const discountedPrice = item.price * 0.9; // 10% discount
+      const discountedPrice = getDiscountedPrice(item.price, item.discountPercentage);
       return total + discountedPrice * item.quantity;
     }, 0);
   };
@@ -84,13 +90,6 @@ export default function Cart() {
     window.open(shareUrl, '_blank');
   };
 
-  // Example Product Recommendations (Cross-selling & Upselling)
-  const recommendedProducts = [
-    { id: 1, title: "Product A", price: 500, image: "/images/product-a.jpg" },
-    { id: 2, title: "Product B", price: 1500, image: "/images/product-b.jpg" },
-    { id: 3, title: "Product C", price: 2500, image: "/images/product-c.jpg" },
-  ];
-
   return (
     <div>
       <Head>
@@ -105,53 +104,57 @@ export default function Cart() {
           <div className="w-full md:w-2/3 bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>
             <div className="space-y-6">
-              {cart.map((item) => (
-                <div key={item._id} className="flex items-center justify-between border-b pb-4 mb-4">
-                  <div className="flex items-center space-x-4">
-                    {item.image ? (
-                      <Image
-                        src={urlFor(item.image).url()}
-                        alt={item.title}
-                        width={80}
-                        height={80}
-                        className="object-cover rounded-md"
-                      />
-                    ) : (
-                      <div className="w-20 h-20 bg-gray-200 flex justify-center items-center rounded-md">
-                        <span className="text-gray-500">No Image</span>
+              {cart.map((item) => {
+                // Get the discounted price for each item
+                const discountedPrice = getDiscountedPrice(item.price, item.discountPercentage);
+                return (
+                  <div key={item._id} className="flex items-center justify-between border-b pb-4 mb-4">
+                    <div className="flex items-center space-x-4">
+                      {item.image ? (
+                        <Image
+                          src={urlFor(item.image).url()}
+                          alt={item.title}
+                          width={80}
+                          height={80}
+                          className="object-cover rounded-md"
+                        />
+                      ) : (
+                        <div className="w-20 h-20 bg-gray-200 flex justify-center items-center rounded-md">
+                          <span className="text-gray-500">No Image</span>
+                        </div>
+                      )}
+                      <div>
+                        <h3 className="text-lg font-medium text-gray-800">{item.title}</h3>
+                        <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
                       </div>
-                    )}
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-800">{item.title}</h3>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm text-gray-500 line-through">Rs. {(item.price * item.quantity).toFixed(2)}</p>
+                      <p className="text-lg font-semibold text-blue-600">Rs. {(discountedPrice * item.quantity).toFixed(2)}</p>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={() => updateQuantity(item._id, 'decrease')}
+                        className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                      >
+                        -
+                      </button>
+                      <button
+                        onClick={() => updateQuantity(item._id, 'increase')}
+                        className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
+                      >
+                        +
+                      </button>
+                      <button
+                        onClick={() => removeFromCart(item._id)}
+                        className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                      >
+                        Remove
+                      </button>
                     </div>
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm text-gray-500 line-through">Rs. {(item.price * item.quantity).toFixed(2)}</p>
-                    <p className="text-lg font-semibold text-blue-600">Rs. {(item.price * 0.9 * item.quantity).toFixed(2)}</p>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => updateQuantity(item._id, 'decrease')}
-                      className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                    >
-                      -
-                    </button>
-                    <button
-                      onClick={() => updateQuantity(item._id, 'increase')}
-                      className="px-3 py-1 bg-gray-200 rounded-md hover:bg-gray-300"
-                    >
-                      +
-                    </button>
-                    <button
-                      onClick={() => removeFromCart(item._id)}
-                      className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
-                    >
-                      Remove
-                    </button>
-                  </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
             {/* Promo Code Section */}
@@ -220,21 +223,21 @@ export default function Cart() {
           <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">You May Also Like</h2>
             <div className="space-y-4">
-              {recommendedProducts.map((product) => (
-                <div key={product.id} className="flex items-center gap-4 border-b pb-4 mb-4">
-                  <Image
-                    src={product.image}
-                    alt={product.title}
-                    width={80}
-                    height={80}
-                    className="object-cover rounded-md"
-                  />
-                  <div>
-                    <h3 className="text-lg font-medium text-gray-800">{product.title}</h3>
-                    <p className="text-sm text-gray-500">Rs. {product.price}</p>
-                  </div>
+              {/* Example Recommendations */}
+              <div className="flex items-center gap-4 border-b pb-4 mb-4">
+                <Image
+                  src="/images/product-a.jpg"
+                  alt="Product A"
+                  width={80}
+                  height={80}
+                  className="object-cover rounded-md"
+                />
+                <div>
+                  <h3 className="text-lg font-medium text-gray-800">Product A</h3>
+                  <p className="text-sm text-gray-500">Rs. 500</p>
                 </div>
-              ))}
+              </div>
+              {/* Add more recommended products as needed */}
             </div>
           </div>
         </div>

@@ -33,7 +33,12 @@ export interface Product {
   };
   reviews: { rating: number; comment: string }[];
   productImage?: string; // Make this field optional, or required if needed
-}
+  
+    asset: {
+      url: "/default-image.jpg", // Path to your default image
+    },
+  };
+
 
 export type cart = {
   id: number;

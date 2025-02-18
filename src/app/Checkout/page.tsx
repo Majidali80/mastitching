@@ -60,7 +60,7 @@ export default function CheckoutPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const subtotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-  const shipping = 10;
+  const shipping = 10; // Flat shipping rate
   const total = Math.max((subtotal - discount) + shipping, 0);
 
   const [formData, setFormData] = useState({
@@ -165,7 +165,7 @@ export default function CheckoutPage() {
         title: "Order Placed!",
         html: `<div>
           <p>Order ID: <strong>${result._id.substring(0, 8)}</strong></p>
-          <p>Total Amount: $${total.toFixed(2)}</p>
+          <p>Total Amount: ${new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}</p>
           <p>Payment Method: ${paymentOption}</p>
         </div>`,
         icon: "success",
@@ -329,13 +329,13 @@ export default function CheckoutPage() {
                 {cart.map((item) => (
                   <div key={item._id} className="flex justify-between items-center">
                     <div className="flex items-center gap-4">
-                    <Image
-  src={urlFor(item.image).url()}
-  alt={item.title}
-  width={48} // Adjust width and height accordingly
-  height={48}
-  className="object-cover rounded"
-/>
+                      <Image
+                        src={urlFor(item.image).url()}
+                        alt={item.title}
+                        width={48} // Adjust width and height accordingly
+                        height={48}
+                        className="object-cover rounded"
+                      />
                       <div>
                         <div className="text-lg">{item.title}</div>
                         <div className="text-sm text-gray-500">Qty: {item.quantity}</div>
@@ -378,11 +378,11 @@ export default function CheckoutPage() {
 
                 <div className="flex justify-between text-lg">
                   <span>Flat Shipping Rate</span>
-                  <span>${shipping.toFixed(2)}</span>
+                  <span>PKR{shipping.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold border-t pt-4">
                   <span>Total</span>
-                  <span>${total.toFixed(2)}</span>
+                  <span>{new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(total)}</span>
                 </div>
 
                 <div className="mt-4">

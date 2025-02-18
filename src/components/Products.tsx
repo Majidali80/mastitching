@@ -62,8 +62,10 @@ const BestSelling = () => {
     setTimeout(() => setNotification(null), 3000);
   };
 
-  const getDiscountedPrice = (price: number) => price * 0.9;
-  const getDiscountPercentage = (price: number, discountedPrice: number) => Math.round(((price - discountedPrice) / price) * 100);
+  // Function to get the discounted price
+  const getDiscountedPrice = (price: number, discountPercentage: number) => {
+    return price - (price * (discountPercentage / 100)); // Apply discount
+  };
 
   return (
     <div className="mb-[100px] mt-[100px] overflow-hidden">
@@ -79,8 +81,7 @@ const BestSelling = () => {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => {
-          const discountedPrice = getDiscountedPrice(product.price);
-          const discountPercentage = getDiscountPercentage(product.price, discountedPrice);
+          const discountedPrice = getDiscountedPrice(product.price, product.discountPercentage);
 
           return (
             <div key={product._id} className="relative bg-white rounded shadow-lg p-6 cursor-pointer hover:shadow-2xl transition-shadow">
@@ -99,7 +100,7 @@ const BestSelling = () => {
                     />
                     {/* Discount Badge */}
                     <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold py-1 px-2 rounded-full">
-                      {discountPercentage}% OFF
+                      {product.discountPercentage}% OFF
                     </div>
                   </div>
                 ) : (
@@ -113,6 +114,7 @@ const BestSelling = () => {
                 </p>
 
                 {/* Rating and Reviews */}
+                
                 <div className="flex items-center text-sm text-yellow-500">
                   <span>★★★★☆</span> <span className="ml-1 text-gray-500">{product.reviews ? product.reviews.length : 0} reviews</span>
                 </div>

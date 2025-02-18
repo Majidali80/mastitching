@@ -85,7 +85,7 @@ const BestSelling = () => {
           return (
             <div key={product._id} className="relative bg-white rounded shadow-lg p-6 cursor-pointer hover:shadow-2xl transition-shadow">
               <Link href={`/products/${product.slug.current}`}>
-                <h2 className="text-lg font-bold mb-2">{product.title}</h2>
+                <h2 className="text-lg font-bold mb-2">{product.productName}</h2>
 
                 {/* Product Image */}
                 {product.image ? (
@@ -114,15 +114,9 @@ const BestSelling = () => {
 
                 {/* Rating and Reviews */}
                 <div className="flex items-center text-sm text-yellow-500">
-                  <span>★★★★☆</span> <span className="ml-1 text-gray-500">{product.reviews.length} reviews</span>
+                  <span>★★★★☆</span> <span className="ml-1 text-gray-500">{product.reviews ? product.reviews.length : 0} reviews</span>
                 </div>
               </Link>
-
-              {/* Color Variations */}
-              <div className="flex space-x-2 mt-2">
-                <span className="w-6 h-6 bg-red-500 rounded-full cursor-pointer"></span>
-                <span className="w-6 h-6 bg-blue-500 rounded-full cursor-pointer"></span>
-              </div>
 
               {/* Add to Cart and Wishlist Buttons */}
               <div className="flex justify-between items-center space-x-4 mt-4">

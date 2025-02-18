@@ -9,14 +9,12 @@ import { urlFor } from "../../sanity/lib/client";
 import Image from 'next/image';
 import { FaTruck, FaShareAlt } from 'react-icons/fa';
 
-
 // Function to fetch related or latest products
 const fetchRelatedProducts = async () => {
-  const query = `*[_type == "product"] | order(_createdAt desc) [0...5]`; // Fetching latest 5 products
   try {
-    const response = await fetch('/api/getRelatedProducts'); // Adjust this if you're using a specific API for fetching products
+    const response = await fetch('/api/getRelatedProducts');
     const data = await response.json();
-    return data.products; // Assuming API returns products array
+    return data.products;
   } catch (error) {
     console.error("Error fetching related products:", error);
     return [];
@@ -26,10 +24,6 @@ const fetchRelatedProducts = async () => {
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
-  const [promoCode, setPromoCode] = useState('');
-  const [discount] = useState(0);
-  const [flashSaleTimeLeft, setFlashSaleTimeLeft] = useState(60); // in minutes
-  const [progress, setProgress] = useState(0); // For progress bar
   const [relatedProducts, setRelatedProducts] = useState([]); // State to store related products
 
   // Fetch related products when component mounts
@@ -60,8 +54,7 @@ export default function Cart() {
     return originalTotal >= 30000 ? 0 : originalTotal >= 7000 ? 600 : 250;
   };
 
-  const handleCheckout = (discountedPrice: number) => {
-    
+  const handleCheckout = () => {
     Swal.fire({
       title: 'Proceed to Checkout?',
       text: "Are you sure you want to proceed to the checkout page?",
@@ -77,18 +70,7 @@ export default function Cart() {
     });
   };
 
-  // Calculate the progress based on the total cart value
-  const calculateProgress = () => {
-    const totalAmount = calculateTotal();
-    if (totalAmount >= 20000) return 100;  // Full progress for large cart
-    if (totalAmount >= 10000) return 50;   // 50% progress for medium cart
-    return 0;                             // No progress for small cart
-  };
-
-  useEffect(() => {
-    setProgress(calculateProgress());  // Update progress whenever the cart changes
-  }, [cart]);  // Re-run when cart updates
-
+  
   // Social media sharing
   const shareCart = () => {
     const cartUrl = window.location.href; // Share current cart page URL
@@ -176,7 +158,7 @@ export default function Cart() {
               <span className="text-lg font-semibold text-gray-800">Total:</span>
               <span className="text-xl font-bold text-blue-600">
                 Rs. {(
-                  calculateTotal() * (1 - discount) + estimateShipping()
+                  calculateTotal() + estimateShipping()
                 ).toFixed(2)}
               </span>
             </div>
@@ -191,31 +173,7 @@ export default function Cart() {
             </div>
           </div>
 
-          {/* Product Recommendations */}
-          <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
-            <h2 className="text-2xl font-semibold text-gray-800 mb-4">You May Also Like</h2>
-            <div className="space-y-4">
-              {relatedProducts.length > 0 ? (
-                relatedProducts.map((product) => (
-                  <div key={product._id} className="flex items-center gap-4 border-b pb-4 mb-4">
-                    <Image
-                      src={urlFor(product.image).url()}
-                      alt={product.title}
-                      width={80}
-                      height={80}
-                      className="object-cover rounded-md"
-                    />
-                    <div>
-                      <h3 className="text-lg font-medium text-gray-800">{product.title}</h3>
-                      <p className="text-sm text-gray-500">Rs. {product.price}</p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p>No related products found.</p>
-              )}
-            </div>
-          </div>
+        
         </div>
 
         {/* Social Media Sharing */}

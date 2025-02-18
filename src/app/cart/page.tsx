@@ -9,24 +9,38 @@ import { urlFor } from "../../sanity/lib/client";
 import Image from 'next/image';
 import { FaTruck, FaShareAlt } from 'react-icons/fa';
 
+
+// Function to fetch related or latest products
+const fetchRelatedProducts = async () => {
+  const query = `*[_type == "product"] | order(_createdAt desc) [0...5]`; // Fetching latest 5 products
+  try {
+    const response = await fetch('/api/getRelatedProducts'); // Adjust this if you're using a specific API for fetching products
+    const data = await response.json();
+    return data.products; // Assuming API returns products array
+  } catch (error) {
+    console.error("Error fetching related products:", error);
+    return [];
+  }
+};
+
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
   const [promoCode, setPromoCode] = useState('');
-  const [discount, setDiscount] = useState(0);
+  const [discount] = useState(0);
   const [flashSaleTimeLeft, setFlashSaleTimeLeft] = useState(60); // in minutes
-  const [progress, setProgress] = useState(0);  // For progress bar
+  const [progress, setProgress] = useState(0); // For progress bar
+  const [relatedProducts, setRelatedProducts] = useState([]); // State to store related products
 
+  // Fetch related products when component mounts
   useEffect(() => {
-    // Flash Sale Timer
-    const timer = setInterval(() => {
-      if (flashSaleTimeLeft > 0) {
-        setFlashSaleTimeLeft(flashSaleTimeLeft - 1);
-      }
-    }, 60000); // Decrease every minute
+    const getRelatedProducts = async () => {
+      const products = await fetchRelatedProducts(); // Fetch latest/related products
+      setRelatedProducts(products); // Set related products state
+    };
 
-    return () => clearInterval(timer);
-  }, [flashSaleTimeLeft]);
+    getRelatedProducts(); // Call function on mount
+  }, []); // Empty dependency array ensures this runs only once on mount
 
   // Function to get the discounted price for an item
   const getDiscountedPrice = (price: number, discountPercentage: number) => {
@@ -43,18 +57,11 @@ export default function Cart() {
 
   const estimateShipping = () => {
     const originalTotal = cart.reduce((total, item) => total + item.price * item.quantity, 0);
-    return originalTotal >= 10000 ? 0 : originalTotal >= 7000 ? 500 : 250;
+    return originalTotal >= 30000 ? 0 : originalTotal >= 7000 ? 600 : 250;
   };
 
-  const applyPromoCode = () => {
-    if (promoCode === 'DISCOUNT10') {
-      setDiscount(0.1); // 10% off
-    } else {
-      setDiscount(0);
-    }
-  };
-
-  const handleCheckout = () => {
+  const handleCheckout = (discountedPrice: number) => {
+    
     Swal.fire({
       title: 'Proceed to Checkout?',
       text: "Are you sure you want to proceed to the checkout page?",
@@ -73,8 +80,8 @@ export default function Cart() {
   // Calculate the progress based on the total cart value
   const calculateProgress = () => {
     const totalAmount = calculateTotal();
-    if (totalAmount >= 4000) return 100;  // Full progress for large cart
-    if (totalAmount >= 2000) return 50;   // 50% progress for medium cart
+    if (totalAmount >= 20000) return 100;  // Full progress for large cart
+    if (totalAmount >= 10000) return 50;   // 50% progress for medium cart
     return 0;                             // No progress for small cart
   };
 
@@ -105,7 +112,6 @@ export default function Cart() {
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Order Summary</h2>
             <div className="space-y-6">
               {cart.map((item) => {
-                // Get the discounted price for each item
                 const discountedPrice = getDiscountedPrice(item.price, item.discountPercentage);
                 return (
                   <div key={item._id} className="flex items-center justify-between border-b pb-4 mb-4">
@@ -157,40 +163,6 @@ export default function Cart() {
               })}
             </div>
 
-            {/* Promo Code Section */}
-            <div className="mt-6">
-              <input
-                type="text"
-                placeholder="Enter Promo Code"
-                value={promoCode}
-                onChange={(e) => setPromoCode(e.target.value)}
-                className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              />
-              <button
-                onClick={applyPromoCode}
-                className="mt-2 w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-              >
-                Apply Promo Code
-              </button>
-              {discount > 0 && (
-                <div className="mt-4 text-green-500 font-semibold">
-                  Promo Applied: {discount * 100}% Off
-                </div>
-              )}
-            </div>
-
-            {/* Progress Bar */}
-            <div className="mt-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-2">Discount Progress</h3>
-              <div className="h-2 bg-gray-300 rounded-full mt-2">
-                <div
-                  style={{ width: `${progress}%` }}
-                  className="h-2 bg-green-500 rounded-full"
-                />
-              </div>
-              <p className="mt-2 text-sm text-gray-600">You are {progress}% towards your discount!</p>
-            </div>
-
             {/* Shipping Estimate */}
             <div className="mt-6 p-4 border rounded-lg">
               <h3 className="text-xl font-semibold text-gray-800 mb-4 flex items-center gap-2">
@@ -223,21 +195,25 @@ export default function Cart() {
           <div className="w-full md:w-1/3 bg-white p-6 rounded-lg shadow-lg">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">You May Also Like</h2>
             <div className="space-y-4">
-              {/* Example Recommendations */}
-              <div className="flex items-center gap-4 border-b pb-4 mb-4">
-                <Image
-                  src="/images/product-a.jpg"
-                  alt="Product A"
-                  width={80}
-                  height={80}
-                  className="object-cover rounded-md"
-                />
-                <div>
-                  <h3 className="text-lg font-medium text-gray-800">Product A</h3>
-                  <p className="text-sm text-gray-500">Rs. 500</p>
-                </div>
-              </div>
-              {/* Add more recommended products as needed */}
+              {relatedProducts.length > 0 ? (
+                relatedProducts.map((product) => (
+                  <div key={product._id} className="flex items-center gap-4 border-b pb-4 mb-4">
+                    <Image
+                      src={urlFor(product.image).url()}
+                      alt={product.title}
+                      width={80}
+                      height={80}
+                      className="object-cover rounded-md"
+                    />
+                    <div>
+                      <h3 className="text-lg font-medium text-gray-800">{product.title}</h3>
+                      <p className="text-sm text-gray-500">Rs. {product.price}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <p>No related products found.</p>
+              )}
             </div>
           </div>
         </div>

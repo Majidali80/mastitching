@@ -110,12 +110,12 @@ const BestSelling = () => {
                 {/* Price Section */}
                 <p className="text-gray-900 font-bold mb-4">
                   <span className="line-through text-gray-500">PKR {product.price}</span>
-                  <span className="ml-2 text-red-500">PKR {discountedPrice.toFixed(2)}</span>
+                  <span className="ml-2 text-red-500 ml-20">PKR {discountedPrice.toFixed(2)}</span>
                 </p>
 
                 {/* Rating and Reviews */}
                 
-                <div className="flex items-center text-sm text-yellow-500">
+                <div className="flex items-center text-sm text-yellow-500 ml-16">
                   <span>★★★★☆</span> <span className="ml-1 text-gray-500">{product.reviews ? product.reviews.length : 0} reviews</span>
                 </div>
               </Link>
@@ -140,12 +140,15 @@ const BestSelling = () => {
               </div>
 
               {/* Product Tag (e.g. New, Best Seller) */}
-              <div className="absolute top-2 left-2 bg-yellow-500 text-black text-xs font-semibold py-1 px-2 rounded-full">
+              <div className="absolute top-2 left-5 bg-yellow-500 text-black text-xs font-semibold py-1 px-2 rounded-full">
                 Best Seller
+              </div>
+              <div className="absolute top-10 right-8 bg-blue-500 text-black text-xs font-semibold py-1 px-2 rounded-full">
+                Small
               </div>
 
               {/* Availability */}
-              <div className="text-sm text-green-500 mt-2">In Stock</div>
+              <div className="text-sm text-green-500 ml-28">In Stock</div>
             </div>
           );
         })}

@@ -32,6 +32,7 @@ export interface Product {
     current: string;
   };
   reviews: { rating: number; comment: string }[];
+  productImage?: string; // Make this field optional, or required if needed
 }
 
 export type cart = {

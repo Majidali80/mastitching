@@ -94,9 +94,9 @@ const BestSelling = () => {
                     <Image
                       src={urlFor(product.image).url()}
                       alt={product.title}
-                      width={500}
+                      width={350}
                       height={300}
-                      className="w-full h-48 object-cover mb-2"
+                      className="w-full h-48 object-cover mb-2 hover"
                     />
                     {/* Discount Badge */}
                     <div className="absolute top-2 left-2 bg-red-600 text-white text-xs font-semibold py-1 px-2 rounded-full">

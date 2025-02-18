@@ -1,5 +1,4 @@
-"use client";
-
+"use client"
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
@@ -11,7 +10,6 @@ import { Product } from "../utils/types";
 const Wishlist = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [wishlist, setWishlist] = useState<Set<string>>(() => {
-    // Retrieve wishlist from local storage if available
     if (typeof window !== "undefined") {
       const storedWishlist = localStorage.getItem("wishlist");
       return storedWishlist ? new Set<string>(JSON.parse(storedWishlist)) : new Set<string>();
@@ -19,10 +17,8 @@ const Wishlist = () => {
     return new Set<string>();
   });
 
-  // Cart context
   const { addToCart } = useCart();
 
-  // Fetch all products
   useEffect(() => {
     async function fetchProducts() {
       const products = await sanityClient.fetch('*[_type == "product"]{ _id, title, description, price, image, slug, productImage }');
@@ -31,13 +27,11 @@ const Wishlist = () => {
     fetchProducts();
   }, []);
 
-  // Handle wishlist item removal
   const handleRemoveFromWishlist = (productId: string) => {
     const updatedWishlist = new Set(wishlist);
     updatedWishlist.delete(productId);
     setWishlist(updatedWishlist);
 
-    // Save to local storage
     if (typeof window !== "undefined") {
       localStorage.setItem("wishlist", JSON.stringify([...updatedWishlist]));
     }
@@ -100,16 +94,21 @@ const Wishlist = () => {
 
                 {/* Add to Cart Button */}
                 <button
-                  onClick={() =>
-                    addToCart({
-                      ...product,
-                      productImage: product.productImage || defaultImage, // Use fallback image object
-                    })
-                  }
-                  className="absolute bottom-2 right-2 text-blue-500 hover:text-blue-600 transition duration-300"
-                >
-                  <FaShoppingCart size={24} />
-                </button>
+  onClick={() => {
+    const formattedProductImage = typeof product.productImage === "string" 
+      ? { asset: { url: product.productImage } } // If productImage is a string, convert it to the expected object format
+      : product.productImage || defaultImage;  // If it's already the correct format or undefined, fallback to defaultImage
+
+    addToCart({
+      ...product,
+      productImage: formattedProductImage,
+    });
+  }}
+  className="absolute bottom-2 right-2 text-blue-500 hover:text-blue-600 transition duration-300"
+>
+  <FaShoppingCart size={24} />
+</button>
+
               </div>
             ))}
         </div>

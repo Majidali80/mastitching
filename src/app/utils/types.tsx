@@ -49,5 +49,5 @@ export type cart = {
   category: string;
   size: string;
   quantity: number;
-  discount?: number;
+  discountPercentage: number;
 };

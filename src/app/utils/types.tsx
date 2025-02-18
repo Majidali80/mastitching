@@ -31,6 +31,7 @@ export interface Product {
     _type: "slug";
     current: string;
   };
+  reviews: { rating: number; comment: string }[];
 }
 
 export type cart = {

@@ -7,7 +7,7 @@ import { useCart } from '../context/cartContext';
 import Swal from "sweetalert2";
 import { urlFor } from "../../sanity/lib/client";
 import Image from 'next/image';
-import { FaTruck, FaGift, FaShareAlt } from 'react-icons/fa';
+import { FaTruck, FaShareAlt } from 'react-icons/fa';
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
@@ -64,15 +64,7 @@ export default function Cart() {
     });
   };
 
-  // Progressive Discounts (Buy more, save more)
-  const progressiveDiscount = () => {
-    const totalAmount = calculateTotal();
-    if (totalAmount >= 4000) return 0.15; // 15% discount
-    if (totalAmount >= 2000) return 0.10; // 10% discount
-    return 0; // No discount
-  };
-
-  // Calculate progress bar for progressive discount
+    // Calculate progress bar for progressive discount
   const calculateProgress = () => {
     const totalAmount = calculateTotal();
     if (totalAmount >= 4000) return 100;

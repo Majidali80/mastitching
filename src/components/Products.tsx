@@ -1,4 +1,5 @@
 "use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { client, urlFor } from "../sanity/lib/client";
@@ -6,7 +7,7 @@ import { allProductsQuery } from "../sanity/lib/queries";
 import { Product } from "../app/utils/types";
 import { FaRegHeart, FaHeart, FaShoppingCart } from "react-icons/fa";
 import { useCart } from "../app/context/cartContext";
-import Image from "next/image"; // Import Image component from Next.js
+import Image from "next/image";
 
 const BestSelling = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -18,8 +19,8 @@ const BestSelling = () => {
     return new Set<string>();
   });
 
-  const [notification, setNotification] = useState<string | null>(null); // For notifications
-  const [notificationType, setNotificationType] = useState<string>(''); // For notification type (cart/wishlist)
+  const [notification, setNotification] = useState<string | null>(null);
+  const [notificationType, setNotificationType] = useState<string>('');
 
   useEffect(() => {
     async function fetchProduct() {
@@ -36,7 +37,6 @@ const BestSelling = () => {
   }, [wishlist]);
 
   const { cart, addToCart } = useCart();
-
   const totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
 
   const handleWishlistToggle = (productId: string) => {
@@ -50,20 +50,20 @@ const BestSelling = () => {
       return updatedWishlist;
     });
 
-    // Show notification for wishlist action
     setNotification('Item added to Wishlist');
     setNotificationType('wishlist');
-    setTimeout(() => setNotification(null), 3000); // Hide notification after 3 seconds
+    setTimeout(() => setNotification(null), 3000);
   };
 
   const handleAddToCart = (product: Product) => {
     addToCart(product);
-
-    // Show notification for cart action
     setNotification('Item added to Cart');
     setNotificationType('cart');
-    setTimeout(() => setNotification(null), 3000); // Hide notification after 3 seconds
+    setTimeout(() => setNotification(null), 3000);
   };
+
+  const getDiscountedPrice = (price: number) => price * 0.9;
+  const getDiscountPercentage = (price: number, discountedPrice: number) => Math.round(((price - discountedPrice) / price) * 100);
 
   return (
     <div className="mb-[100px] mt-[100px] overflow-hidden">
@@ -79,16 +79,15 @@ const BestSelling = () => {
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => {
-          // Get the discount percentage from Sanity
-          const discountPercentage = product.discount || 0; // Default to 0 if no discount
-          
-          // Calculate the discounted price
-          const discountedPrice = product.price * (1 - discountPercentage / 100);
+          const discountedPrice = getDiscountedPrice(product.price);
+          const discountPercentage = getDiscountPercentage(product.price, discountedPrice);
 
           return (
-            <div key={product._id} className="relative bg-white rounded shadow-lg p-4 cursor-pointer hover:shadow-2xl transition-shadow">
+            <div key={product._id} className="relative bg-white rounded shadow-lg p-6 cursor-pointer hover:shadow-2xl transition-shadow">
               <Link href={`/products/${product.slug.current}`}>
                 <h2 className="text-lg font-bold mb-2">{product.title}</h2>
+
+                {/* Product Image */}
                 {product.image ? (
                   <div className="relative">
                     <Image
@@ -107,23 +106,30 @@ const BestSelling = () => {
                   <p className="text-gray-500">No image available</p>
                 )}
 
-                {/* Display original and discounted prices */}
-                <div className="flex justify-between items-center">
-                  <p className="text-gray-900 font-bold">
-                    <span className="line-through text-gray-500">PKR {product.price}</span>
-                  </p>
-                  <p className="text-red-500 font-bold">
-                    PKR {discountedPrice.toFixed(2)}
-                  </p>
+                {/* Price Section */}
+                <p className="text-gray-900 font-bold mb-4">
+                  <span className="line-through text-gray-500">PKR {product.price}</span>
+                  <span className="ml-2 text-red-500">PKR {discountedPrice.toFixed(2)}</span>
+                </p>
+
+                {/* Rating and Reviews */}
+                <div className="flex items-center text-sm text-yellow-500">
+                  <span>★★★★☆</span> <span className="ml-1 text-gray-500">{product.reviews.length} reviews</span>
                 </div>
               </Link>
 
-              {/* Buttons Section - Add to Wishlist & Add to Cart */}
-              <div className="flex justify-between items-center space-x-4">
+              {/* Color Variations */}
+              <div className="flex space-x-2 mt-2">
+                <span className="w-6 h-6 bg-red-500 rounded-full cursor-pointer"></span>
+                <span className="w-6 h-6 bg-blue-500 rounded-full cursor-pointer"></span>
+              </div>
+
+              {/* Add to Cart and Wishlist Buttons */}
+              <div className="flex justify-between items-center space-x-4 mt-4">
                 {/* Wishlist Button */}
                 <button
                   onClick={() => handleWishlistToggle(product._id)}
-                  className="bg-red-500 text-white p-3 rounded-full shadow-md hover:bg-red-600 focus:outline-none"
+                  className="bg-red-500 text-white p-3 rounded-full shadow-md hover:bg-red-600 focus:outline-none hover:scale-110 transition-transform"
                 >
                   {wishlist.has(product._id) ? <FaHeart size={24} /> : <FaRegHeart size={24} />}
                 </button>
@@ -131,11 +137,19 @@ const BestSelling = () => {
                 {/* Add to Cart Button */}
                 <button
                   onClick={() => handleAddToCart(product)}
-                  className="bg-blue-500 text-white p-3 rounded-full shadow-md hover:bg-blue-600 focus:outline-none"
+                  className="bg-blue-500 text-white p-3 rounded-full shadow-md hover:bg-blue-600 focus:outline-none hover:scale-110 transition-transform"
                 >
                   <FaShoppingCart size={24} />
                 </button>
               </div>
+
+              {/* Product Tag (e.g. New, Best Seller) */}
+              <div className="absolute top-2 left-2 bg-yellow-500 text-black text-xs font-semibold py-1 px-2 rounded-full">
+                Best Seller
+              </div>
+
+              {/* Availability */}
+              <div className="text-sm text-green-500 mt-2">In Stock</div>
             </div>
           );
         })}

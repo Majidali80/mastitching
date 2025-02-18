@@ -6,6 +6,7 @@ export interface Product {
   productName: string;
   title:string;
   image: {
+    slice(arg0: number, arg1: number): unknown;
     asset: {
       url: string;
     };

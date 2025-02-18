@@ -2,6 +2,7 @@
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
 
+
 type Product = {
   _id: string;
   title: string;

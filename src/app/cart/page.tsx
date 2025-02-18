@@ -15,7 +15,7 @@ export default function Cart() {
   const [promoCode, setPromoCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [flashSaleTimeLeft, setFlashSaleTimeLeft] = useState(60); // in minutes
-  const [progress, setProgress] = useState(0); // Progress bar for progressive discounts
+  
 
   useEffect(() => {
     // Flash Sale Timer

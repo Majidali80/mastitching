@@ -7,6 +7,7 @@ import { createClient } from "@sanity/client";
 import Swal from "sweetalert2";
 import { FaShoppingCart } from "react-icons/fa";
 import { urlFor } from "@//sanity/lib/client"; // Assuming you have this utility to get the image URLs from Sanity
+import Image from 'next/image';
 
 // Sanity client configuration
 const sanityClient = createClient({
@@ -16,14 +17,6 @@ const sanityClient = createClient({
   useCdn: false,
   token: process.env.NEXT_PUBLIC_SANITY_TOKEN,
 });
-
-interface CartItem {
-  _id: string;
-  name: string;
-  price: number;
-  quantity: number;
-  image: any; // Assuming the image field is part of the cart item
-}
 
 interface OrderData {
   _type: string;
@@ -336,11 +329,13 @@ export default function CheckoutPage() {
                 {cart.map((item) => (
                   <div key={item._id} className="flex justify-between items-center">
                     <div className="flex items-center gap-4">
-                      <img
-                        src={urlFor(item.image).url()}
-                        alt={item.title}
-                        className="w-12 h-12 object-cover rounded"
-                      />
+                    <Image
+  src={urlFor(item.image).url()}
+  alt={item.title}
+  width={48} // Adjust width and height accordingly
+  height={48}
+  className="object-cover rounded"
+/>
                       <div>
                         <div className="text-lg">{item.title}</div>
                         <div className="text-sm text-gray-500">Qty: {item.quantity}</div>

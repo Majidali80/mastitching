@@ -13,7 +13,7 @@ import { FaTruck, FaShareAlt } from 'react-icons/fa';
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();
   const router = useRouter();
-  const [relatedProducts, setRelatedProducts] = useState([]); // State to store related products
+  
 
   // Function to get the discounted price for an item
   const getDiscountedPrice = (price: number, discountPercentage: number) => {

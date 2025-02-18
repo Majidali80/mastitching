@@ -15,16 +15,6 @@ export default function Cart() {
   const router = useRouter();
   const [relatedProducts, setRelatedProducts] = useState([]); // State to store related products
 
-  // Fetch related products when component mounts
-  useEffect(() => {
-    const getRelatedProducts = async () => {
-      const products = await fetchRelatedProducts(); // Fetch latest/related products
-      setRelatedProducts(products); // Set related products state
-    };
-
-    getRelatedProducts(); // Call function on mount
-  }, []); // Empty dependency array ensures this runs only once on mount
-
   // Function to get the discounted price for an item
   const getDiscountedPrice = (price: number, discountPercentage: number) => {
     return price - (price * (discountPercentage / 100));

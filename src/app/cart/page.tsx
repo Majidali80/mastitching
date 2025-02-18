@@ -9,17 +9,6 @@ import { urlFor } from "../../sanity/lib/client";
 import Image from 'next/image';
 import { FaTruck, FaShareAlt } from 'react-icons/fa';
 
-// Function to fetch related or latest products
-const fetchRelatedProducts = async () => {
-  try {
-    const response = await fetch('/api/getRelatedProducts');
-    const data = await response.json();
-    return data.products;
-  } catch (error) {
-    console.error("Error fetching related products:", error);
-    return [];
-  }
-};
 
 export default function Cart() {
   const { cart, updateQuantity, removeFromCart } = useCart();

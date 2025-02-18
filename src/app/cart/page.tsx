@@ -15,7 +15,7 @@ export default function Cart() {
   const [promoCode, setPromoCode] = useState('');
   const [discount, setDiscount] = useState(0);
   const [flashSaleTimeLeft, setFlashSaleTimeLeft] = useState(60); // in minutes
-  
+  const [progress, setProgress] = useState(0);  // For progress bar
 
   useEffect(() => {
     // Flash Sale Timer
@@ -64,7 +64,17 @@ export default function Cart() {
     });
   };
 
-   
+  // Calculate the progress based on the total cart value
+  const calculateProgress = () => {
+    const totalAmount = calculateTotal();
+    if (totalAmount >= 4000) return 100;  // Full progress for large cart
+    if (totalAmount >= 2000) return 50;   // 50% progress for medium cart
+    return 0;                             // No progress for small cart
+  };
+
+  useEffect(() => {
+    setProgress(calculateProgress());  // Update progress whenever the cart changes
+  }, [cart]);  // Re-run when cart updates
 
   // Social media sharing
   const shareCart = () => {
@@ -166,7 +176,17 @@ export default function Cart() {
               )}
             </div>
 
-           
+            {/* Progress Bar */}
+            <div className="mt-6">
+              <h3 className="text-lg font-semibold text-gray-800 mb-2">Discount Progress</h3>
+              <div className="h-2 bg-gray-300 rounded-full mt-2">
+                <div
+                  style={{ width: `${progress}%` }}
+                  className="h-2 bg-green-500 rounded-full"
+                />
+              </div>
+              <p className="mt-2 text-sm text-gray-600">You are {progress}% towards your discount!</p>
+            </div>
 
             {/* Shipping Estimate */}
             <div className="mt-6 p-4 border rounded-lg">

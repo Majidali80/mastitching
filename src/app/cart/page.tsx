@@ -64,13 +64,7 @@ export default function Cart() {
     });
   };
 
-    // Calculate progress bar for progressive discount
-  const calculateProgress = () => {
-    const totalAmount = calculateTotal();
-    if (totalAmount >= 4000) return 100;
-    if (totalAmount >= 2000) return 50;
-    return 0;
-  };
+   
 
   // Social media sharing
   const shareCart = () => {
@@ -172,25 +166,7 @@ export default function Cart() {
               )}
             </div>
 
-            {/* Progressive Discount Section */}
-            <div className="mt-6 p-4 bg-blue-100 rounded-lg">
-              <h3 className="text-lg font-semibold text-blue-700">Progressive Discount</h3>
-              <p className="text-gray-700">Spend more to unlock discounts:</p>
-              <div className="flex justify-between items-center mt-2">
-                <div>Spend Rs. 2000 to unlock 10% off</div>
-                <div>Spend Rs. 4000 to unlock 15% off</div>
-              </div>
-              <div className="mt-4">
-                <div className="text-gray-700">Your Progress:</div>
-                <div className="h-2 bg-gray-300 rounded-full mt-2">
-                  <div
-                    style={{ width: `${calculateProgress()}%` }}
-                    className="h-2 bg-green-500 rounded-full"
-                  />
-                </div>
-                <div className="text-sm text-gray-600 mt-2">{calculateProgress()}% to the next discount</div>
-              </div>
-            </div>
+           
 
             {/* Shipping Estimate */}
             <div className="mt-6 p-4 border rounded-lg">

@@ -1,11 +1,13 @@
-"use client"
+// src/app/wishlist/page.tsx
+"use client";
+
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { FaHeart, FaShoppingCart } from "react-icons/fa"; // Remove FaRegHeart if not used
-import Image from "next/image"; // Import Image component
-import { useCart } from "../context/cartContext"; // Import Cart Context to interact with cart
+import { FaHeart, FaShoppingCart } from "react-icons/fa";
+import Image from "next/image";
+import { useCart } from "../context/cartContext";
 import sanityClient, { urlFor } from "../../sanity/lib/client";
-import { Product } from "../utils/types"; // Import Product type
+import { Product } from "../utils/types";
 
 const Wishlist = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -24,7 +26,7 @@ const Wishlist = () => {
   // Fetch all products
   useEffect(() => {
     async function fetchProducts() {
-      const products = await sanityClient.fetch('*[_type == "product"]');
+      const products = await sanityClient.fetch('*[_type == "product"]{ _id, title, description, price, image, slug, productImage }');
       setProducts(products);
     }
     fetchProducts();
@@ -70,8 +72,8 @@ const Wishlist = () => {
                     <Image
                       src={urlFor(product.image).url()}
                       alt={product.title}
-                      width={300} // Add width
-                      height={200} // Add height
+                      width={300}
+                      height={200}
                       className="w-full h-48 object-cover mb-2"
                     />
                   ) : (
@@ -92,7 +94,12 @@ const Wishlist = () => {
 
                 {/* Add to Cart Button */}
                 <button
-                  onClick={() => addToCart(product)}
+                  onClick={() =>
+                    addToCart({
+                      ...product,
+                      productImage: product.productImage || "default-image.jpg", // Add fallback for missing productImage
+                    })
+                  }
                   className="absolute bottom-2 right-2 text-blue-500 hover:text-blue-600 transition duration-300"
                 >
                   <FaShoppingCart size={24} />

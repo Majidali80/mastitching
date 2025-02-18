@@ -9,7 +9,7 @@ import Image from "next/image";
 import { FaTruck, FaCreditCard, FaMoneyBillWave, FaWallet } from "react-icons/fa";
 
 export default function CheckoutPage() {
-  const { cart } = useCart();
+  const { cart, clearCart } = useCart();
   const router = useRouter();
 
   // State for delivery details
@@ -64,6 +64,12 @@ export default function CheckoutPage() {
     }));
   };
 
+  // Generate a random order confirmation number
+  const generateOrderNumber = () => {
+    const randomNum = Math.floor(Math.random() * 1000000);
+    return `ORD-${randomNum}`;
+  };
+
   // Handle form submission
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,14 +85,19 @@ export default function CheckoutPage() {
       return;
     }
 
+    // Generate order confirmation number
+    const orderNumber = generateOrderNumber();
+
     // Simulate order placement
     Swal.fire({
       title: "Order Placed!",
-      text: "Your order has been successfully placed.",
+      text: `Your order has been successfully placed. Your order confirmation number is ${orderNumber}`,
       icon: "success",
       confirmButtonText: "OK",
     }).then(() => {
-      router.push("/"); // Redirect to home after order is placed
+      // Clear the cart and redirect to homepage after order is placed
+      clearCart();
+      router.push("/"); // Redirect to home
     });
   };
 

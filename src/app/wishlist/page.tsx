@@ -1,4 +1,3 @@
-// src/app/wishlist/page.tsx
 "use client";
 
 import { useEffect, useState } from "react";
@@ -42,6 +41,13 @@ const Wishlist = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("wishlist", JSON.stringify([...updatedWishlist]));
     }
+  };
+
+  // Fallback image object
+  const defaultImage = {
+    asset: {
+      url: "/default-image.jpg", // Path to your default image
+    },
   };
 
   return (
@@ -97,7 +103,7 @@ const Wishlist = () => {
                   onClick={() =>
                     addToCart({
                       ...product,
-                      productImage: product.productImage || "default-image.jpg", // Add fallback for missing productImage
+                      productImage: product.productImage || defaultImage, // Use fallback image object
                     })
                   }
                   className="absolute bottom-2 right-2 text-blue-500 hover:text-blue-600 transition duration-300"

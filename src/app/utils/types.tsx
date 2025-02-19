@@ -1,10 +1,7 @@
-// src/types/product.ts
-
 export interface Product {
-  discount(price: number, discount: number): unknown;
   _id: string;
   productName: string;
-  title:string;
+  title: string;
   image: {
     length: number;
     map(arg0: (image: import("@sanity/image-url/lib/types/types").SanityImageSource, index: import("react").Key | null | undefined) => import("react").JSX.Element): import("react").ReactNode | Iterable<import("react").ReactNode>;
@@ -18,7 +15,7 @@ export interface Product {
   fabricType: string;
   materials: string[];
   dimensions: string;
-  sizes: { size: string; price: number }[];
+  sizes: { size: string; price: number }[];  // This will allow sizes with prices
   tags: string[];
   category: string;
   inventory: number;
@@ -26,7 +23,6 @@ export interface Product {
   discountPercentage: number;
   careInstructions: string;
   availability: string;
-  selectedSize:string;
   customerReviews: string[];
   dateAdded: string;
   shippingInformation: string;
@@ -36,13 +32,12 @@ export interface Product {
     current: string;
   };
   reviews: { rating: number; comment: string }[];
-  productImage?: string; // Make this field optional, or required if needed
+  productImage?: string;
+  // Adding optional fields for the cart context
+  selectedSize: string; // This is added to store selected size
+  quantity: number;     // This is added to store quantity
   
-    asset: {
-      url: "/default-image.jpg", // Path to your default image
-    },
-  };
-
+}
 
 export type cart = {
   id: number;
@@ -51,8 +46,8 @@ export type cart = {
   slug: string;
   price: number;
   category: string;
-  size: string;
   selectedSize:string;
   quantity: number;
   discountPercentage: number;
+  discount?: (price: number, discount: number) => number; // This is optional and can be a function to apply discount
 };

@@ -11,6 +11,9 @@
   "dependencies": {
     "@sanity/image-url": "^1.1.0",
     "@sanity/vision": "^3.75.0",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "lucide-react": "^0.475.0",
     "next": "^14.2.23",
     "next-sanity": "^9.8.55",
     "react": "^18.3.1",
@@ -19,12 +22,15 @@
     "sanity": "^3.75.0",
     "shadcn-ui": "^0.9.4",
     "styled-components": "^6.1.15",
-    "sweetalert2": "^11.16.0"
+    "sweetalert2": "^11.16.0",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss-animate": "^1.0.7"
   },
   "devDependencies": {
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",
+    "daisyui": "^4.12.23",
     "eslint": "^8",
     "eslint-config-next": "14.2.23",
     "postcss": "^8",

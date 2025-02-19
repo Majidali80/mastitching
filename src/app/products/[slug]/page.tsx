@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
@@ -14,19 +14,6 @@ const ProductDetailsPage = () => {
   const { slug } = useParams();
 
   const { addToCart } = useCart(); // Access the addToCart function from context
-
-  const [wishlist, setWishlist] = useState<Product[]>([]);
-  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false); // Track adding state
-
-  // Load wishlist from localStorage after the component mounts
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const savedWishlist = localStorage.getItem("wishlist");
-      if (savedWishlist) {
-        setWishlist(JSON.parse(savedWishlist));
-      }
-    }
-  }, []);
 
   useEffect(() => {
     if (slug) {
@@ -54,7 +41,6 @@ const ProductDetailsPage = () => {
       : product.price - (product.price * (product.discountPercentage || 0)) / 100;
   const originalPrice = selectedSizeData ? selectedSizeData.price : product.price;
 
-  // Add to Cart functionality using context
   const handleAddToCart = () => {
     if (!selectedSize) {
       alert("Please select a size before adding to the cart!");
@@ -66,57 +52,11 @@ const ProductDetailsPage = () => {
     addToCart({
       ...product,
       selectedSize,
-      price: originalPrice, // Store original price only
+      price: originalPrice,
       quantity,
     });
 
     alert("Product added to cart!");
-  };
-
-  // Add to Wishlist functionality with smooth experience
-  const handleAddToWishlist = async () => {
-    if (isAddingToWishlist) return; // Prevent multiple requests
-
-    if (!product) {
-      Swal.fire({
-        title: "Error",
-        text: "Unable to add the product to the wishlist. Try again later.",
-        icon: "error",
-        confirmButtonText: "OK",
-      });
-      return;
-    }
-
-    setIsAddingToWishlist(true); // Set loading state
-
-    // Check if product is already in the wishlist
-    if (wishlist.some((item) => item.slug.current === product.slug.current)) {
-      setIsAddingToWishlist(false); // Reset loading state
-      Swal.fire({
-        title: "Already in Wishlist",
-        text: "This product is already in your wishlist.",
-        icon: "info",
-        confirmButtonText: "OK",
-      });
-      return;
-    }
-
-    // Add product to wishlist
-    const updatedWishlist = [...wishlist, product];
-    setWishlist(updatedWishlist);
-
-    // Save updated wishlist to localStorage
-    localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
-
-    setIsAddingToWishlist(false); // Reset loading state
-
-    // Show success message
-    Swal.fire({
-      title: "Added to Wishlist!",
-      text: "This product has been added to your wishlist.",
-      icon: "success",
-      confirmButtonText: "OK",
-    });
   };
 
   return (
@@ -124,7 +64,7 @@ const ProductDetailsPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="relative">
           {product.discountPercentage && (
-            <span className="absolute top-2 right-2 bg-red-500 text-white px-4 py-1 text-xl font-bold rounded-full">
+            <span className="absolute top-2 right-2 bg-myLgold text-white px-4 py-1 text-xl font-bold rounded-full">
               {product.discountPercentage}% OFF
             </span>
           )}
@@ -134,24 +74,16 @@ const ProductDetailsPage = () => {
               alt={product.title}
               width={500}
               height={100}
-              className="w-full h-auto object-cover"
+              className="w-full h-auto object-cover border-myLgold"
             />
           )}
 
-          {/* Add to Cart and Add to Wishlist buttons placed below the image */}
           <div className="mt-6 flex justify-center gap-4">
             <button
-              className="bg-blue-500 text-white py-3 px-6 rounded-full hover:bg-blue-600 transition"
+              className="bg-myDgold text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
               onClick={handleAddToCart}
             >
               Add to Cart
-            </button>
-            <button
-              className="bg-purple-500 text-white py-3 px-6 rounded-full hover:bg-purple-600 transition"
-              onClick={handleAddToWishlist}
-              disabled={isAddingToWishlist} // Disable button while adding
-            >
-              {isAddingToWishlist ? "Adding..." : "Add to Wishlist"}
             </button>
           </div>
         </div>
@@ -172,7 +104,7 @@ const ProductDetailsPage = () => {
           </p>
           {product.sizes && product.sizes.length > 0 && (
             <div className="mt-6">
-              <p className="text-lg font-semibold">Available Sizes:</p>
+              <p className="text-lg font-semibold text-myBkack">Available Sizes:</p>
               <select
                 className="mt-2 p-2 border rounded"
                 onChange={(e) => setSelectedSize(e.target.value)}
@@ -192,14 +124,14 @@ const ProductDetailsPage = () => {
 
           <div className="mt-6 flex items-center">
             <button
-              className="bg-gray-300 px-4 py-2 rounded-full"
+              className="bg-myLgold px-4 py-2 rounded-full"
               onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
             >
               -
             </button>
             <span className="mx-4 text-lg">{quantity}</span>
             <button
-              className="bg-gray-300 px-4 py-2 rounded-full"
+              className="bg-myLgold px-4 py-2 rounded-full"
               onClick={() => setQuantity((prev) => prev + 1)}
             >
               +
@@ -208,11 +140,10 @@ const ProductDetailsPage = () => {
 
           <div className="mt-4">
             <p className="text-xl font-semibold text-red-600">
-              Total Discounted Price: PKR {(discountedPrice * quantity).toFixed(2)}
+              Discounted Price: PKR {(discountedPrice * quantity).toFixed(2)}
             </p>
           </div>
 
-          {/* Additional Product Details */}
           <div className="mt-6">
             <h2 className="text-2xl font-bold mb-4">Product Details</h2>
             <table className="table-auto border-collapse border border-gray-300 w-full text-left">

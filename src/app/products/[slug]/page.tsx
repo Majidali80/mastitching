@@ -1,5 +1,5 @@
-"use client";
-import Swal from "sweetalert2";
+"use client"
+import Swal from "sweetalert2"; // Make sure SweetAlert2 is imported
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { client, urlFor } from "../../../sanity/lib/client";
@@ -43,7 +43,11 @@ const ProductDetailsPage = () => {
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      alert("Please select a size before adding to the cart!");
+      Swal.fire({
+        icon: 'warning',
+        title: 'Oops...',
+        text: 'Please select a size before adding to the cart!',
+      });
       return;
     }
 
@@ -56,7 +60,11 @@ const ProductDetailsPage = () => {
       quantity,
     });
 
-    alert("Product added to cart!");
+    Swal.fire({
+      icon: 'success',
+      title: 'Added to Cart!',
+      text: `${product.title} has been added to your cart.`,
+    });
   };
 
   return (

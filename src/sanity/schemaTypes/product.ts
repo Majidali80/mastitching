@@ -60,10 +60,12 @@ export default defineType({
       title: 'Price',
       type: 'number',
     }),
+    // Modify this section for multiple images
     defineField({
-      name: 'image',
-      title: 'Image',
-      type: 'image',
+      name: 'images',
+      title: 'Images',
+      type: 'array',
+      of: [{ type: 'image' }],
       options: {
         hotspot: true, // Enable hotspot for better image cropping
       },

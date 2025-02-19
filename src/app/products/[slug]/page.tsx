@@ -1,4 +1,5 @@
-"use client";
+"use client"
+import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { client, urlFor } from "../../../sanity/lib/client";
@@ -10,10 +11,22 @@ const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
-  const [selectedImage, setSelectedImage] = useState<string>("");
   const { slug } = useParams();
-  
+
   const { addToCart } = useCart(); // Access the addToCart function from context
+
+  const [wishlist, setWishlist] = useState<Product[]>([]);
+  const [isAddingToWishlist, setIsAddingToWishlist] = useState(false); // Track adding state
+
+  // Load wishlist from localStorage after the component mounts
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const savedWishlist = localStorage.getItem("wishlist");
+      if (savedWishlist) {
+        setWishlist(JSON.parse(savedWishlist));
+      }
+    }
+  }, []);
 
   useEffect(() => {
     if (slug) {
@@ -22,9 +35,6 @@ const ProductDetailsPage = () => {
         try {
           const productDetails = await client.fetch(query, { slug });
           setProduct(productDetails);
-          if (productDetails.images && productDetails.images.length > 0) {
-            setSelectedImage(urlFor(productDetails.images[0]).url());
-          }
         } catch (error) {
           console.error("Error fetching product details:", error);
         }
@@ -50,8 +60,63 @@ const ProductDetailsPage = () => {
       alert("Please select a size before adding to the cart!");
       return;
     }
-    addToCart({ ...product, selectedSize, price: discountedPrice, quantity });
+
+    const originalPrice = selectedSizeData ? selectedSizeData.price : product.price;
+
+    addToCart({
+      ...product,
+      selectedSize,
+      price: originalPrice, // Store original price only
+      quantity,
+    });
+
     alert("Product added to cart!");
+  };
+
+  // Add to Wishlist functionality with smooth experience
+  const handleAddToWishlist = async () => {
+    if (isAddingToWishlist) return; // Prevent multiple requests
+
+    if (!product) {
+      Swal.fire({
+        title: "Error",
+        text: "Unable to add the product to the wishlist. Try again later.",
+        icon: "error",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    setIsAddingToWishlist(true); // Set loading state
+
+    // Check if product is already in the wishlist
+    if (wishlist.some((item) => item.slug.current === product.slug.current)) {
+      setIsAddingToWishlist(false); // Reset loading state
+      Swal.fire({
+        title: "Already in Wishlist",
+        text: "This product is already in your wishlist.",
+        icon: "info",
+        confirmButtonText: "OK",
+      });
+      return;
+    }
+
+    // Add product to wishlist
+    const updatedWishlist = [...wishlist, product];
+    setWishlist(updatedWishlist);
+
+    // Save updated wishlist to localStorage
+    localStorage.setItem("wishlist", JSON.stringify(updatedWishlist));
+
+    setIsAddingToWishlist(false); // Reset loading state
+
+    // Show success message
+    Swal.fire({
+      title: "Added to Wishlist!",
+      text: "This product has been added to your wishlist.",
+      icon: "success",
+      confirmButtonText: "OK",
+    });
   };
 
   return (
@@ -63,25 +128,41 @@ const ProductDetailsPage = () => {
               {product.discountPercentage}% OFF
             </span>
           )}
-          {selectedImage && (
+          {product.image && (
             <Image
-              src={selectedImage}
+              src={urlFor(product.image).url()}
               alt={product.title}
               width={500}
-              height={500}
+              height={100}
               className="w-full h-auto object-cover"
             />
           )}
+
+          {/* Add to Cart and Add to Wishlist buttons placed below the image */}
+          <div className="mt-6 flex justify-center gap-4">
+            <button
+              className="bg-blue-500 text-white py-3 px-6 rounded-full hover:bg-blue-600 transition"
+              onClick={handleAddToCart}
+            >
+              Add to Cart
+            </button>
+            <button
+              className="bg-purple-500 text-white py-3 px-6 rounded-full hover:bg-purple-600 transition"
+              onClick={handleAddToWishlist}
+              disabled={isAddingToWishlist} // Disable button while adding
+            >
+              {isAddingToWishlist ? "Adding..." : "Add to Wishlist"}
+            </button>
+          </div>
         </div>
+
         <div>
           <h1 className="text-3xl font-bold">{product.title}</h1>
           <p className="text-gray-700 mt-4">{product.description}</p>
           <p className="text-lg font-semibold mt-4">
             Original Price: <span className="line-through text-gray-500">PKR {originalPrice}</span>
           </p>
-          <p className="text-2xl text-red-500">
-            Discounted Price: PKR {discountedPrice.toFixed(2)}
-          </p>
+
           <p
             className={`text-sm mt-2 ${
               product.availability === "In Stock" ? "text-green-500" : "text-red-500"
@@ -97,7 +178,9 @@ const ProductDetailsPage = () => {
                 onChange={(e) => setSelectedSize(e.target.value)}
                 value={selectedSize || ""}
               >
-                <option value="" disabled>Select a Size</option>
+                <option value="" disabled>
+                  Select a Size
+                </option>
                 {product.sizes.map((sizeOption, index) => (
                   <option key={index} value={sizeOption.size}>
                     {sizeOption.size} - PKR {sizeOption.price}
@@ -106,6 +189,7 @@ const ProductDetailsPage = () => {
               </select>
             </div>
           )}
+
           <div className="mt-6 flex items-center">
             <button
               className="bg-gray-300 px-4 py-2 rounded-full"
@@ -121,30 +205,64 @@ const ProductDetailsPage = () => {
               +
             </button>
           </div>
+
           <div className="mt-4">
-            <p className="text-xl font-semibold">Total Price: PKR {(discountedPrice * quantity).toFixed(2)}</p>
+            <p className="text-xl font-semibold text-red-600">
+              Total Discounted Price: PKR {(discountedPrice * quantity).toFixed(2)}
+            </p>
           </div>
-          <button
-            className="bg-blue-500 text-white py-3 px-6 rounded-full mt-6 hover:bg-blue-600 transition"
-            onClick={handleAddToCart}
-          >
-            Add to Cart
-          </button>
+
+          {/* Additional Product Details */}
+          <div className="mt-6">
+            <h2 className="text-2xl font-bold mb-4">Product Details</h2>
+            <table className="table-auto border-collapse border border-gray-300 w-full text-left">
+              <tbody>
+                {product.fabricType && (
+                  <tr>
+                    <th className="border border-gray-300 p-2 bg-gray-100">Fabric Type:</th>
+                    <td className="border border-gray-300 p-2">{product.fabricType}</td>
+                  </tr>
+                )}
+                {product.dimensions && (
+                  <tr>
+                    <th className="border border-gray-300 p-2 bg-gray-100">Dimensions:</th>
+                    <td className="border border-gray-300 p-2">{product.dimensions}</td>
+                  </tr>
+                )}
+                {product.category && (
+                  <tr>
+                    <th className="border border-gray-300 p-2 bg-gray-100">Category:</th>
+                    <td className="border border-gray-300 p-2">{product.category}</td>
+                  </tr>
+                )}
+                {product.colors && product.colors.length > 0 && (
+                  <tr>
+                    <th className="border border-gray-300 p-2 bg-gray-100">Colors:</th>
+                    <td className="border border-gray-300 p-2">{product.colors.join(", ")}</td>
+                  </tr>
+                )}
+                {product.materials && product.materials.length > 0 && (
+                  <tr>
+                    <th className="border border-gray-300 p-2 bg-gray-100">Materials:</th>
+                    <td className="border border-gray-300 p-2">{product.materials.join(", ")}</td>
+                  </tr>
+                )}
+                {product.careInstructions && (
+                  <tr>
+                    <th className="border border-gray-300 p-2 bg-gray-100">Care Instructions:</th>
+                    <td className="border border-gray-300 p-2">{product.careInstructions}</td>
+                  </tr>
+                )}
+                {product.shippingInformation && (
+                  <tr>
+                    <th className="border border-gray-300 p-2 bg-gray-100">Shipping Information:</th>
+                    <td className="border border-gray-300 p-2">{product.shippingInformation}</td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-      <div className="mt-6 flex space-x-4">
-        {product.images && product.images.length > 0 && product.images.map((image, index) => (
-          <div key={index} className="w-20 h-20 cursor-pointer">
-            <Image
-              src={urlFor(image).url()}
-              alt={`Thumbnail ${index}`}
-              width={80}
-              height={80}
-              className="object-cover"
-              onClick={() => setSelectedImage(urlFor(image).url())}
-            />
-          </div>
-        ))}
       </div>
     </div>
   );

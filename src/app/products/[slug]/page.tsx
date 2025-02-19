@@ -1,6 +1,6 @@
 "use client"; 
 import { useEffect, useState } from "react";
-import { useParams } from "next/navigation"; // Use useParams instead of useRouter
+import { useParams } from "next/navigation"; // Use useParams from next/navigation for App Router
 import { client, urlFor } from "../../../sanity/lib/client"; // Adjust import path
 import { Product } from "../../../app/utils/types";
 import Image from "next/image";
@@ -11,6 +11,7 @@ const ProductDetailsPage = () => {
   const [wishlist, setWishlist] = useState<Product[]>([]);
   const [selectedSize, setSelectedSize] = useState<string | null>(null); // Add state for size
   const [quantity, setQuantity] = useState(1); // Add state for quantity
+  const [selectedImage, setSelectedImage] = useState<string>(""); // Add state for selected image
   const { slug } = useParams(); // Use useParams instead of useRouter
 
   useEffect(() => {
@@ -20,6 +21,9 @@ const ProductDetailsPage = () => {
         try {
           const productDetails = await client.fetch(query, { slug });
           setProduct(productDetails);
+          if (productDetails.images && productDetails.images.length > 0) {
+            setSelectedImage(urlFor(productDetails.images[0]).url()); // Set the first image as the default
+          }
         } catch (error) {
           console.error("Error fetching product details:", error);
         }
@@ -72,9 +76,9 @@ const ProductDetailsPage = () => {
               {product.discountPercentage}% OFF
             </span>
           )}
-          {product.image && (
+          {selectedImage && (
             <Image
-              src={urlFor(product.image).url()}
+              src={selectedImage}
               alt={product.title}
               width={500}
               height={500}
@@ -148,54 +152,7 @@ const ProductDetailsPage = () => {
           <div className="mt-4">
             <p className="text-xl font-semibold">Total Price: PKR {(discountedPrice * quantity).toFixed(2)}</p>
           </div>
- {/* Table Display of Additional Fields */}
- <div className="mt-8">
-            <h2 className="text-2xl font-semibold">Product Details</h2>
-            <table className="table-auto w-full mt-4 border-collapse border border-gray-300">
-              <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-300 px-4 py-2 text-left">Field</th>
-                  <th className="border border-gray-300 px-4 py-2 text-left">Details</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 font-semibold">Fabric Type</td>
-                  <td className="border border-gray-300 px-4 py-2">{product.fabricType}</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 font-semibold">Materials</td>
-                  <td className="border border-gray-300 px-4 py-2">{product.materials?.join(", ")}</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 font-semibold">Dimensions</td>
-                  <td className="border border-gray-300 px-4 py-2">{product.dimensions}</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 font-semibold">Tags</td>
-                  <td className="border border-gray-300 px-4 py-2">{product.tags?.join(", ")}</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 font-semibold">Category</td>
-                  <td className="border border-gray-300 px-4 py-2">{product.category}</td>
-                </tr>
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 font-semibold">Colors</td>
-                  <td className="border border-gray-300 px-4 py-2">{product.colors?.join(", ")}</td>
-                </tr>
-               
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 font-semibold">Care Instructions</td>
-                  <td className="border border-gray-300 px-4 py-2">{product.careInstructions}</td>
-                </tr>
-                
-                <tr>
-                  <td className="border border-gray-300 px-4 py-2 font-semibold">Shipping Information</td>
-                  <td className="border border-gray-300 px-4 py-2">{product.shippingInformation}</td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+
           {/* Add to Cart Button */}
           <button
             className="bg-blue-500 text-white py-3 px-6 rounded-full mt-6 hover:bg-blue-600 transition"
@@ -212,6 +169,22 @@ const ProductDetailsPage = () => {
             Add to Wishlist
           </button>
         </div>
+      </div>
+
+      {/* Thumbnails */}
+      <div className="mt-6 flex space-x-4">
+        {product.images && product.images.length > 0 && product.images.map((image, index) => (
+          <div key={index} className="w-20 h-20 cursor-pointer">
+            <Image
+              src={urlFor(image).url()}
+              alt={`Thumbnail ${index}`}
+              width={80}
+              height={80}
+              className="object-cover"
+              onClick={() => setSelectedImage(urlFor(image).url())}
+            />
+          </div>
+        ))}
       </div>
     </div>
   );

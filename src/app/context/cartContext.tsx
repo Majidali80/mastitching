@@ -8,7 +8,7 @@ type Product = {
   title: string;
   price: number;
   image:string;
-  iscountPercentage: number;
+  discountPercentage: number;
   productImage: {
     asset: {
       url: string;

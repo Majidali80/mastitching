@@ -6,6 +6,8 @@ export interface Product {
   productName: string;
   title:string;
   image: {
+    length: number;
+    map(arg0: (image: import("@sanity/image-url/lib/types/types").SanityImageSource, index: import("react").Key | null | undefined) => import("react").JSX.Element): import("react").ReactNode | Iterable<import("react").ReactNode>;
     slice(arg0: number, arg1: number): unknown;
     asset: {
       url: string;
@@ -24,6 +26,7 @@ export interface Product {
   discountPercentage: number;
   careInstructions: string;
   availability: string;
+  selectedSize:string;
   customerReviews: string[];
   dateAdded: string;
   shippingInformation: string;
@@ -49,6 +52,7 @@ export type cart = {
   price: number;
   category: string;
   size: string;
+  selectedSize:string;
   quantity: number;
   discountPercentage: number;
 };

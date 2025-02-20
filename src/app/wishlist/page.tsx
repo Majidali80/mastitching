@@ -101,7 +101,7 @@ const Wishlist = () => {
 
     addToCart({
       ...product,
-      productImage: formattedProductImage,
+      productImage: formattedProductImage.asset.url,  // Access the URL string directly
     });
   }}
   className="absolute bottom-2 right-2 text-blue-500 hover:text-blue-600 transition duration-300"

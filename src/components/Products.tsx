@@ -110,7 +110,7 @@ const BestSelling = () => {
                 {/* Price Section */}
                 <p className="text-gray-900 font-bold mb-4">
                   <span className="line-through text-gray-500">PKR {product.price}</span>
-                  <span className="ml-2 text-red-500 ml-20">PKR {discountedPrice.toFixed(2)}</span>
+                  <span className=" text-red-500 ml-20">PKR {discountedPrice.toFixed(2)}</span>
                 </p>
 
                 {/* Rating and Reviews */}

@@ -65,9 +65,14 @@ export default defineType({
       name: 'images',
       title: 'Images',
       type: 'array',
-      of: [{ type: 'image' }],
+      of: [{
+        type: 'image',
+        options: {
+          hotspot: true
+        }
+      }],
       options: {
-        hotspot: true, // Enable hotspot for better image cropping
+        // Any array-specific options can go here
       },
     }),
     defineField({

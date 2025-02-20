@@ -51,8 +51,6 @@ const ProductDetailsPage = () => {
       return;
     }
 
-    const originalPrice = selectedSizeData ? selectedSizeData.price : product.price;
-
     addToCart({
       ...product,
       selectedSize,

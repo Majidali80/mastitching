@@ -1,26 +1,16 @@
 // context/cartContext.tsx
 "use client";
 import { createContext, useContext, useState, ReactNode } from "react";
+import { Product as ProductType } from "../utils/types";  // Import the main Product type
 
-
-type Product = {
-  _id: string;
-  title: string;
-  price: number;
-  image:string;
-  discountPercentage: number;
-  productImage: {
-    asset: {
-      url: string;
-    };
-  };
+type CartItem = ProductType & {
+  quantity: number;
+  selectedSize: string;
 };
-
-type CartItem = Product & { quantity: number };
 
 type CartContextType = {
   cart: CartItem[];
-  addToCart: (product: Product) => void;
+  addToCart: (product: ProductType & { selectedSize: string; quantity: number }) => void;
   updateQuantity: (productId: string, action: "increase" | "decrease") => void;
   removeFromCart: (productId: string) => void;
   clearCart: () => void;
@@ -31,7 +21,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
 
-  const addToCart = (product: Product) => {
+  const addToCart = (product: ProductType & { selectedSize: string; quantity: number }) => {
     setCart((prevCart) => {
       const existingProduct = prevCart.find((item) => item._id === product._id);
       if (existingProduct) {

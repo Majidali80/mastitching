@@ -4,7 +4,7 @@ import order from './order'
 import customer from './customer'
 import orderTracking from './orderTracking'
 import inventory from './inventory'
-
+import subscriber from './subscriber'
 export const schema: { types: SchemaTypeDefinition[] } = {
-  types: [product, order, customer, orderTracking, inventory],
+  types: [product, order, customer, orderTracking, inventory, subscriber],
 }

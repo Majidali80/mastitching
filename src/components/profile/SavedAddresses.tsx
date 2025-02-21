@@ -24,8 +24,6 @@ export default function SavedAddresses() {
     // Add more addresses as needed
   ]);
 
-  const [isAddingNew, setIsAddingNew] = useState<boolean>(false);
-
   const handleDelete = async (id: string) => {
     try {
       // API call to delete address
@@ -54,7 +52,6 @@ export default function SavedAddresses() {
       <div className="flex flex-col items-center mb-6 text-center">
         <h2 className="text-2xl font-semibold text-gray-900 mb-4">Saved Addresses</h2>
         <button
-          onClick={() => setIsAddingNew(true)}
           className="flex items-center gap-2 px-4 py-2 rounded-lg bg-orange-500 text-white hover:bg-orange-600 transition-colors"
         >
           <FaPlus className="w-4 h-4" />

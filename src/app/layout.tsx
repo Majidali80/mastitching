@@ -5,6 +5,7 @@ import React from "react";
 import { CartProvider } from "../app/context/cartContext";
 import Navbar from "@/components/Navbar";
 import Notifications from '@/components/ui/Notifications';
+import Footer from '@/components/Footer';
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -35,7 +36,8 @@ export default function RootLayout({
          <CartProvider>
          <Navbar />
          <Notifications />
-        {children}
+        <main>{children}</main>
+        <Footer />
         </CartProvider>
       </body>
     </html>

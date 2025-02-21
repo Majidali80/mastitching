@@ -3,11 +3,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import Image from "next/image";
-import { useCart } from "../context/cartContext";
-import sanityClient, { urlFor } from "../../sanity/lib/client";
-import { Product } from "../utils/types";
+import { useCart } from "@/app/context/cartContext";
+import sanityClient, { urlFor } from "@/sanity/lib/client";
+import { Product } from "@/app/utils/types";
+import { motion, AnimatePresence } from 'framer-motion';
+import { showNotification } from '@/components/ui/Notifications';
 
-const Wishlist = () => {
+export default function Wishlist() {
   const [products, setProducts] = useState<Product[]>([]);
   const [wishlist, setWishlist] = useState<Set<string>>(() => {
     if (typeof window !== "undefined") {
@@ -21,8 +23,13 @@ const Wishlist = () => {
 
   useEffect(() => {
     async function fetchProducts() {
-      const products = await sanityClient.fetch('*[_type == "product"]{ _id, title, description, price, image, slug, productImage }');
-      setProducts(products);
+      try {
+        const products = await sanityClient.fetch('*[_type == "product"]{ _id, title, description, price, image, slug, productImage }');
+        setProducts(products);
+      } catch (error) {
+        showNotification.error('Failed to fetch products');
+        console.error('Error fetching products:', error);
+      }
     }
     fetchProducts();
   }, []);
@@ -35,6 +42,7 @@ const Wishlist = () => {
     if (typeof window !== "undefined") {
       localStorage.setItem("wishlist", JSON.stringify([...updatedWishlist]));
     }
+    showNotification.success('Removed from wishlist');
   };
 
   // Fallback image object
@@ -45,76 +53,111 @@ const Wishlist = () => {
   };
 
   return (
-    <div className="mb-[100px] mt-[100px] overflow-hidden">
-      <div className="container px-5 mx-auto">
+    <div className="min-h-screen bg-gray-50 py-12">
+      <div className="container mx-auto px-4">
         <div className="text-center mb-10">
-          <h1 className="scroll-m-20 text-xl font-extrabold tracking-tight lg:text-2xl text-myBlue">
-            MY WISHLIST
+          <h1 className="text-3xl font-extrabold text-gray-900 mb-4">
+            My Wishlist
           </h1>
-          <div className="flex mt-2 justify-center">
-            <div className="w-16 h-1 rounded-full bg-myOrange inline-flex" />
+          <div className="flex justify-center">
+            <div className="w-16 h-1 rounded-full bg-orange-500" />
           </div>
         </div>
+
+        {wishlist.size === 0 ? (
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center py-12"
+          >
+            <p className="text-gray-600 mb-6">Your wishlist is empty. Start adding items you love!</p>
+            <Link 
+              href="/products"
+              className="inline-block px-6 py-3 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+            >
+              Explore Products
+            </Link>
+          </motion.div>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <AnimatePresence>
+              {products
+                .filter((product) => wishlist.has(product._id))
+                .map((product) => (
+                  <motion.div
+                    key={product._id}
+                    layout
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg transition-shadow"
+                  >
+                    <Link href={`/products/${product.slug.current}`}>
+                      <div className="relative h-64">
+                        {product.image ? (
+                          <Image
+                            src={urlFor(product.image).url()}
+                            alt={product.title}
+                            fill
+                            className="object-cover"
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center bg-gray-100">
+                            <p className="text-gray-500">No image available</p>
+                          </div>
+                        )}
+                      </div>
+                    </Link>
+
+                    <div className="p-4">
+                      <Link href={`/products/${product.slug.current}`}>
+                        <h2 className="text-lg font-semibold text-gray-900 hover:text-orange-600 transition-colors">
+                          {product.title}
+                        </h2>
+                      </Link>
+                      
+                      <p className="text-gray-600 mt-2 line-clamp-2">
+                        {product.description}
+                      </p>
+                      
+                      <p className="text-orange-600 font-bold mt-2">
+                        PKR {product.price.toLocaleString()}
+                      </p>
+
+                      <div className="flex justify-between items-center mt-4">
+                        <button
+                          onClick={() => {
+                            const formattedProductImage = typeof product.productImage === "string"
+                              ? { asset: { url: product.productImage } }
+                              : product.productImage || defaultImage;
+
+                            addToCart({
+                              ...product,
+                              productImage: formattedProductImage.asset.url,
+                            });
+                            showNotification.success('Added to cart');
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
+                        >
+                          <FaShoppingCart className="w-4 h-4" />
+                          Add to Cart
+                        </button>
+
+                        <button
+                          onClick={() => handleRemoveFromWishlist(product._id)}
+                          className="p-2 text-red-500 hover:text-red-600 transition-colors"
+                          aria-label="Remove from wishlist"
+                        >
+                          <FaHeart className="w-5 h-5" />
+                        </button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))}
+            </AnimatePresence>
+          </div>
+        )}
       </div>
-
-      {wishlist.size === 0 ? (
-        <div className="text-center">
-          <p>Your wishlist is empty. Start adding items to your wishlist!</p>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {products
-            .filter((product) => wishlist.has(product._id)) // Only display products in the wishlist
-            .map((product) => (
-              <div key={product._id} className="relative bg-white rounded shadow p-4 cursor-pointer">
-                <Link href={`/products/${product.slug.current}`}>
-                  {product.image ? (
-                    <Image
-                      src={urlFor(product.image).url()}
-                      alt={product.title}
-                      width={300}
-                      height={200}
-                      className="w-full h-48 object-cover mb-2"
-                    />
-                  ) : (
-                    <p className="text-gray-500">No image available</p>
-                  )}
-                  <h2 className="text-lg font-bold">{product.title}</h2>
-                  <p className="text-gray-700">{product.description?.substring(0, 100)}...</p>
-                  <p className="text-gray-900 font-bold">PKR {product.price}</p>
-                </Link>
-
-                {/* Remove from Wishlist Button */}
-                <button
-                  onClick={() => handleRemoveFromWishlist(product._id)}
-                  className="absolute top-2 right-2 text-red-500 hover:text-red-600 transition duration-300"
-                >
-                  <FaHeart size={24} />
-                </button>
-
-                {/* Add to Cart Button */}
-                <button
-  onClick={() => {
-    const formattedProductImage = typeof product.productImage === "string" 
-      ? { asset: { url: product.productImage } } // If productImage is a string, convert it to the expected object format
-      : product.productImage || defaultImage;  // If it's already the correct format or undefined, fallback to defaultImage
-
-    addToCart({
-      ...product,
-      productImage: formattedProductImage.asset.url,  // Access the URL string directly
-    });
-  }}
-  className="absolute bottom-2 right-2 text-blue-500 hover:text-blue-600 transition duration-300"
->
-  <FaShoppingCart size={24} />
-</button>
-
-              </div>
-            ))}
-        </div>
-      )}
     </div>
   );
-};
-
-export default Wishlist;
+}

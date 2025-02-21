@@ -5,9 +5,10 @@ import Link from "next/link";
 import { client, urlFor } from "../sanity/lib/client";
 import { allProductsQuery } from "../sanity/lib/queries";
 import { Product } from "../app/utils/types";
-import { FaRegHeart, FaHeart, FaShoppingCart } from "react-icons/fa";
+import { FaRegHeart, FaHeart, FaShoppingCart, FaTimes } from "react-icons/fa";
 import { useCart } from "../app/context/cartContext";
 import Image from "next/image";
+import { motion, AnimatePresence } from "framer-motion";
 
 const BestSelling = () => {
   const [products, setProducts] = useState<Product[]>([]);
@@ -19,7 +20,12 @@ const BestSelling = () => {
     return new Set<string>();
   });
 
-  const [notification, setNotification] = useState<string | null>(null);
+  const [notification, setNotification] = useState<{
+    message: string;
+    type: string;
+    action?: string;
+  } | null>(null);
+
   const [notificationType, setNotificationType] = useState<string>('');
 
   useEffect(() => {
@@ -39,26 +45,36 @@ const BestSelling = () => {
   const { cart, addToCart } = useCart();
   const totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
 
-  const handleWishlistToggle = (productId: string) => {
+  const handleWishlistToggle = (productId: string, productName: string) => {
     setWishlist((prevWishlist) => {
       const updatedWishlist = new Set(prevWishlist);
       if (updatedWishlist.has(productId)) {
         updatedWishlist.delete(productId);
+        setNotification({
+          message: `${productName} removed from wishlist`,
+          type: 'wishlist',
+          action: 'remove'
+        });
       } else {
         updatedWishlist.add(productId);
+        setNotification({
+          message: `${productName} added to wishlist`,
+          type: 'wishlist',
+          action: 'add'
+        });
       }
       return updatedWishlist;
     });
-
-    setNotification('Item added to Wishlist');
-    setNotificationType('wishlist');
     setTimeout(() => setNotification(null), 3000);
   };
 
   const handleAddToCart = (product: Product) => {
     addToCart(product);
-    setNotification('Item added to Cart');
-    setNotificationType('cart');
+    setNotification({
+      message: `${product.productName} added to cart`,
+      type: 'cart',
+      action: 'view'
+    });
     setTimeout(() => setNotification(null), 3000);
   };
 
@@ -84,9 +100,17 @@ const BestSelling = () => {
           const discountedPrice = getDiscountedPrice(product.price, product.discountPercentage);
 
           return (
-            <div key={product._id} className="relative bg-white rounded shadow-lg p-6 cursor-pointer hover:shadow-2xl transition-shadow">
+            <motion.div
+              key={product._id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="relative bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-2xl transition-all"
+            >
               <Link href={`/products/${product.slug.current}`}>
-                <h2 className="text-lg font-bold mb-2">{product.productName}</h2>
+                {/* Product Title with ellipsis */}
+                <h2 className="text-lg font-bold mb-2 truncate hover:text-clip hover:whitespace-normal">
+                  {product.productName}
+                </h2>
 
                 {/* Product Image */}
                 {product.image ? (
@@ -107,11 +131,11 @@ const BestSelling = () => {
                   <p className="text-gray-500">No image available</p>
                 )}
 
-                {/* Price Section */}
-                <p className="text-gray-900 font-bold mb-4">
+                {/* Enhanced Price Section */}
+                <div className="flex justify-between items-center mb-4">
                   <span className="line-through text-gray-500">PKR {product.price}</span>
-                  <span className=" text-red-500 ml-20">PKR {discountedPrice.toFixed(2)}</span>
-                </p>
+                  <span className="text-red-500 font-bold">PKR {discountedPrice.toFixed(2)}</span>
+                </div>
 
                 {/* Rating and Reviews */}
                 
@@ -120,23 +144,29 @@ const BestSelling = () => {
                 </div>
               </Link>
 
-              {/* Add to Cart and Wishlist Buttons */}
+              {/* Enhanced Action Buttons */}
               <div className="flex justify-between items-center space-x-4 mt-4">
-                {/* Wishlist Button */}
-                <button
-                  onClick={() => handleWishlistToggle(product._id)}
-                  className="bg-red-500 text-white p-3 rounded-full shadow-md hover:bg-red-600 focus:outline-none hover:scale-110 transition-transform"
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
+                  onClick={() => handleWishlistToggle(product._id, product.productName)}
+                  className={`p-3 rounded-full shadow-md focus:outline-none transition-colors ${
+                    wishlist.has(product._id)
+                      ? 'bg-red-500 text-white'
+                      : 'bg-gray-100 text-gray-500 hover:bg-red-500 hover:text-white'
+                  }`}
                 >
                   {wishlist.has(product._id) ? <FaHeart size={24} /> : <FaRegHeart size={24} />}
-                </button>
+                </motion.button>
 
-                {/* Add to Cart Button */}
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={() => handleAddToCart(product)}
-                  className="bg-blue-500 text-white p-3 rounded-full shadow-md hover:bg-blue-600 focus:outline-none hover:scale-110 transition-transform"
+                  className="bg-blue-500 text-white p-3 rounded-full shadow-md hover:bg-blue-600 focus:outline-none"
                 >
                   <FaShoppingCart size={24} />
-                </button>
+                </motion.button>
               </div>
 
               {/* Product Tag (e.g. New, Best Seller) */}
@@ -149,10 +179,46 @@ const BestSelling = () => {
 
               {/* Availability */}
               <div className="text-sm text-green-500 ml-28">In Stock</div>
-            </div>
+            </motion.div>
           );
         })}
       </div>
+
+      {/* Enhanced Mobile Notification */}
+      <AnimatePresence>
+        {notification && (
+          <motion.div
+            initial={{ opacity: 0, y: 50 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 50 }}
+            className="fixed bottom-4 left-4 right-4 bg-white rounded-lg shadow-lg p-4 z-50 md:w-96 md:left-1/2 md:-translate-x-1/2"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <div className={`p-2 rounded-full ${
+                  notification.type === 'cart' ? 'bg-blue-100 text-blue-500' : 'bg-red-100 text-red-500'
+                }`}>
+                  {notification.type === 'cart' ? <FaShoppingCart /> : <FaHeart />}
+                </div>
+                <span className="ml-3 text-gray-800">{notification.message}</span>
+              </div>
+              <button
+                onClick={() => setNotification(null)}
+                className="text-gray-400 hover:text-gray-600"
+              >
+                <FaTimes />
+              </button>
+            </div>
+            {notification.action && (
+              <Link href={notification.type === 'cart' ? '/cart' : '/wishlist'}>
+                <div className="mt-2 text-center py-2 bg-gray-50 rounded-md text-sm font-medium text-gray-600 hover:bg-gray-100">
+                  {notification.type === 'cart' ? 'View Cart' : 'View Wishlist'}
+                </div>
+              </Link>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Cart Icon */}
       <Link href="/cart">
@@ -167,15 +233,6 @@ const BestSelling = () => {
           )}
         </button>
       </Link>
-
-      {/* Notification */}
-      {notification && (
-        <div
-          className={`fixed bottom-4 left-1/2 transform -translate-x-1/2 px-6 py-3 rounded-md text-white ${notificationType === 'cart' ? 'bg-blue-500' : 'bg-red-500'}`}
-        >
-          {notification}
-        </div>
-      )}
     </div>
   );
 };

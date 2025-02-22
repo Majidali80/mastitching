@@ -7,14 +7,14 @@ export const showNotification = {
   success: (message: string) => {
     toast.success(message, {
       style: {
-        background: '#4ade80',
+        background: '#fb923c',
         color: '#fff',
         padding: '16px',
         borderRadius: '8px',
       },
       iconTheme: {
         primary: '#fff',
-        secondary: '#4ade80',
+        secondary: '#fb923c',
       },
     });
   },
@@ -38,7 +38,7 @@ export const showNotification = {
     toast(message, {
       icon: 'ℹ️',
       style: {
-        background: '#3b82f6',
+        background: '#fb923c',
         color: '#fff',
         padding: '16px',
         borderRadius: '8px',
@@ -49,7 +49,7 @@ export const showNotification = {
   loading: (message: string) => {
     return toast.loading(message, {
       style: {
-        background: '#f59e0b',
+        background: '#fb923c',
         color: '#fff',
         padding: '16px',
         borderRadius: '8px',
@@ -71,23 +71,23 @@ export default function Notifications() {
         className: '',
         duration: 3000,
         style: {
-          background: '#363636',
+          background: '#fb923c',
           color: '#fff',
         },
         // Custom success styles
         success: {
           duration: 3000,
           iconTheme: {
-            primary: '#4ade80',
-            secondary: '#fff',
+            primary: '#fff',
+            secondary: '#fb923c',
           },
         },
         // Custom error styles
         error: {
           duration: 4000,
           iconTheme: {
-            primary: '#ef4444',
-            secondary: '#fff',
+            primary: '#fff',
+            secondary: '#ef4444',
           },
         },
       }}

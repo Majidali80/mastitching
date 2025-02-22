@@ -17,10 +17,7 @@ export interface Product {
   fabricType?: string;
   dimensions?: string;
   stockQuantity: number;
-  reviews: Array<{
-    rating: number;
-    comment: string;
-  }>;
+  reviews: { rating: number; comment: string }[];
   isNewArrival: boolean;
   isBestSeller: boolean;
   sizes: { size: string; price: number }[];  // This will allow sizes with prices

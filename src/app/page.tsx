@@ -1,6 +1,8 @@
 import ImageCarousel from '@/components/ImageCarousel';
 import Products from '@/components/Products';
 import FeaturedCategories from '@/components/FeaturedCategories';
+import UserProfile from '../components/UserProfile';
+
 export default function Home() {
   const images = [
     '/1 (1).jpeg',

@@ -1,23 +1,24 @@
 "use client"
+import React, { useState, useEffect } from 'react';
 import Swal from "sweetalert2"; // Make sure SweetAlert2 is imported
-import { useEffect, useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { client, urlFor } from "../../../sanity/lib/client";
 import { Product } from "../../../app/utils/types";
 import Image from "next/image";
 import { useCart } from "../../../app/context/cartContext"; // Import the useCart hook
-import { useWishlist } from "../../../app/wishlist
+
 
 const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
   const [quantity, setQuantity] = useState(1);
   const { slug } = useParams();
+  const router = useRouter(); // Initialize the router
 
   const { addToCart } = useCart(); // Access the addToCart function from context
-  const { addToWishlist } = useWishlist(); // Access the addToWishlist function from context
-
-  const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
+  
+  const [reviews, setReviews] = useState<{ rating: number; comment: string }[]>([]);
+  const [review, setReview] = useState({ rating: 0, comment: '' });
 
   useEffect(() => {
     if (slug) {
@@ -26,6 +27,7 @@ const ProductDetailsPage = () => {
         try {
           const productDetails = await client.fetch(query, { slug });
           setProduct(productDetails);
+          setReviews(productDetails.reviews || []); // Set reviews from product details
         } catch (error) {
           console.error("Error fetching product details:", error);
         }
@@ -33,21 +35,6 @@ const ProductDetailsPage = () => {
       fetchProductDetails();
     }
   }, [slug]);
-
-  useEffect(() => {
-    const fetchSimilarProducts = async () => {
-      if (product) {
-        const query = `*[_type == "product" && category == $category && _id != $id]`;
-        try {
-          const products = await client.fetch(query, { category: product.category, id: product._id });
-          setSimilarProducts(products);
-        } catch (error) {
-          console.error("Error fetching similar products:", error);
-        }
-      }
-    };
-    fetchSimilarProducts();
-  }, [product]);
 
   if (!product) {
     return <div>Loading product details...</div>;
@@ -94,7 +81,7 @@ const ProductDetailsPage = () => {
       return;
     }
 
-    // Logic to handle immediate purchase (e.g., redirect to checkout)
+    // Add the product to the cart
     addToCart({
       ...product,
       selectedSize,
@@ -102,8 +89,9 @@ const ProductDetailsPage = () => {
       quantity,
     });
 
-    // Redirect to checkout page (assuming you have a checkout route)
-    // Example: window.location.href = '/checkout';
+    // Redirect to the checkout page using Next.js router
+    router.push('/Checkout'); // Use router.push for navigation
+
     Swal.fire({
       icon: 'success',
       title: 'Proceeding to Checkout!',
@@ -111,12 +99,25 @@ const ProductDetailsPage = () => {
     });
   };
 
-  const handleAddToWishlist = () => {
-    addToWishlist(product); // Add the product to the wishlist
+  const handleReviewSubmit = (e) => {
+    e.preventDefault();
+    if (!review.rating || !review.comment) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Incomplete Review',
+        text: 'Please provide a rating and a comment.',
+      });
+      return;
+    }
+
+    // Add the new review to the reviews state
+    setReviews((prevReviews) => [...prevReviews, review]);
+    setReview({ rating: 0, comment: '' });
+
     Swal.fire({
       icon: 'success',
-      title: 'Added to Wishlist!',
-      text: `${product.title} has been added to your wishlist.`,
+      title: 'Review Submitted!',
+      text: 'Thank you for your feedback.',
     });
   };
 
@@ -125,7 +126,7 @@ const ProductDetailsPage = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div className="relative">
           {product.discountPercentage && (
-            <span className="absolute top-2 right-2 bg-myLgold text-white px-4 py-1 text-xl font-bold rounded-full">
+            <span className="absolute top-2 right-2 bg-orange-900 text-white px-4 py-1 text-xl font-bold rounded-full">
               {product.discountPercentage}% OFF
             </span>
           )}
@@ -135,13 +136,13 @@ const ProductDetailsPage = () => {
               alt={product.title}
               width={500}
               height={100}
-              className="w-full h-auto object-cover border-myLgold"
+              className="w-full h-auto object-cover border-orange-900"
             />
           )}
 
           <div className="mt-6 flex justify-center gap-4">
             <button
-              className="bg-myDgold text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
+              className="bg-orange-900 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
               onClick={handleAddToCart}
             >
               Add to Cart
@@ -152,17 +153,12 @@ const ProductDetailsPage = () => {
             >
               Buy Now
             </button>
-            <button
-              className="bg-myDgold text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-              onClick={handleAddToWishlist}
-            >
-              Add to Wishlist
-            </button>
+            
           </div>
         </div>
 
         <div>
-          <h1 className="text-3xl font-bold">{product.title}</h1>
+          <h1 className="text-3xl font-bold text-orange-900">{product.title}</h1>
           <p className="text-gray-700 mt-4">{product.description}</p>
           <p className="text-lg font-semibold mt-4">
             Original Price: <span className="line-through text-gray-500">PKR {originalPrice}</span>
@@ -197,14 +193,14 @@ const ProductDetailsPage = () => {
 
           <div className="mt-6 flex items-center">
             <button
-              className="bg-myLgold px-4 py-2 rounded-full"
+              className="bg-orange-900 px-4 py-2 rounded-full"
               onClick={() => setQuantity((prev) => Math.max(1, prev - 1))}
             >
               -
             </button>
             <span className="mx-4 text-lg">{quantity}</span>
             <button
-              className="bg-myLgold px-4 py-2 rounded-full"
+              className="bg-orange-900 px-4 py-2 rounded-full"
               onClick={() => setQuantity((prev) => prev + 1)}
             >
               +
@@ -212,14 +208,14 @@ const ProductDetailsPage = () => {
           </div>
 
           <div className="mt-4">
-            <p className="text-xl font-semibold text-red-600">
+            <p className="text-xl font-semibold text-orange-900">
               Discounted Price: PKR {(discountedPrice * quantity).toFixed(2)}
             </p>
           </div>
 
           <div className="mt-6">
             <h2 className="text-2xl font-bold mb-4">Product Details</h2>
-            <table className="table-auto border-collapse border border-gray-300 w-full text-left">
+            <table className="table-auto border-collapse border border-orange-900 w-full text-left">
               <tbody>
                 {product.fabricType && (
                   <tr>
@@ -270,15 +266,49 @@ const ProductDetailsPage = () => {
       </div>
 
       <div className="mt-10">
-        <h2 className="text-2xl font-bold">Similar Products</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {similarProducts.map((similarProduct) => (
-            <div key={similarProduct._id} className="border p-4 rounded-lg">
-              <h3 className="font-semibold">{similarProduct.title}</h3>
-              <p className="text-gray-700">PKR {similarProduct.price}</p>
-              <button className="btn-primary mt-2">View Details</button>
-            </div>
-          ))}
+        <h2 className="text-2xl font-bold">Customer Reviews</h2>
+        <form onSubmit={handleReviewSubmit} className="mt-4">
+          <div>
+            <label className="block mb-2">Rating:</label>
+            <select
+              value={review.rating}
+              onChange={(e) => setReview({ ...review, rating: Number(e.target.value) })}
+              className="border rounded p-2"
+            >
+              <option value={0}>Select Rating</option>
+              <option value={1}>1 Star</option>
+              <option value={2}>2 Stars</option>
+              <option value={3}>3 Stars</option>
+              <option value={4}>4 Stars</option>
+              <option value={5}>5 Stars</option>
+            </select>
+          </div>
+          <div className="mt-4">
+            <label className="block mb-2">Comment:</label>
+            <textarea
+              value={review.comment}
+              onChange={(e) => setReview({ ...review, comment: e.target.value })}
+              className="border rounded p-2 w-full"
+              rows={4}
+            />
+          </div>
+          <button type="submit" className="bg-myDgold text-white py-2 px-4 rounded mt-4">
+            Submit Review
+          </button>
+        </form>
+
+        <div className="mt-6">
+          <h3 className="text-xl font-bold">Reviews:</h3>
+          {reviews.length > 0 ? (
+            reviews.map((rev, index) => (
+              <div key={index} className="border p-4 mt-2 rounded">
+                <p className="font-semibold">Rating: {rev.rating} Stars</p>
+                <p>{rev.comment}</p>
+              </div>
+            ))
+          ) : (
+            <p>No reviews yet.</p>
+          )}
         </div>
       </div>
     </div>

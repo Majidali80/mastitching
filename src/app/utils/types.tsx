@@ -12,6 +12,7 @@ export interface Product {
   };
   price: number;
   description: string;
+  
   fabricType: string;
   materials: string[];
   dimensions: string;

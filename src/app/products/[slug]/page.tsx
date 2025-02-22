@@ -6,6 +6,7 @@ import { client, urlFor } from "../../../sanity/lib/client";
 import { Product } from "../../../app/utils/types";
 import Image from "next/image";
 import { useCart } from "../../../app/context/cartContext"; // Import the useCart hook
+import { useWishlist } from "../../../app/wishlist
 
 const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
@@ -14,6 +15,9 @@ const ProductDetailsPage = () => {
   const { slug } = useParams();
 
   const { addToCart } = useCart(); // Access the addToCart function from context
+  const { addToWishlist } = useWishlist(); // Access the addToWishlist function from context
+
+  const [similarProducts, setSimilarProducts] = useState<Product[]>([]);
 
   useEffect(() => {
     if (slug) {
@@ -29,6 +33,21 @@ const ProductDetailsPage = () => {
       fetchProductDetails();
     }
   }, [slug]);
+
+  useEffect(() => {
+    const fetchSimilarProducts = async () => {
+      if (product) {
+        const query = `*[_type == "product" && category == $category && _id != $id]`;
+        try {
+          const products = await client.fetch(query, { category: product.category, id: product._id });
+          setSimilarProducts(products);
+        } catch (error) {
+          console.error("Error fetching similar products:", error);
+        }
+      }
+    };
+    fetchSimilarProducts();
+  }, [product]);
 
   if (!product) {
     return <div>Loading product details...</div>;
@@ -65,6 +84,42 @@ const ProductDetailsPage = () => {
     });
   };
 
+  const handleBuyNow = () => {
+    if (!selectedSize) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'Oops...',
+        text: 'Please select a size before proceeding to buy!',
+      });
+      return;
+    }
+
+    // Logic to handle immediate purchase (e.g., redirect to checkout)
+    addToCart({
+      ...product,
+      selectedSize,
+      price: originalPrice,
+      quantity,
+    });
+
+    // Redirect to checkout page (assuming you have a checkout route)
+    // Example: window.location.href = '/checkout';
+    Swal.fire({
+      icon: 'success',
+      title: 'Proceeding to Checkout!',
+      text: `${product.title} will be purchased.`,
+    });
+  };
+
+  const handleAddToWishlist = () => {
+    addToWishlist(product); // Add the product to the wishlist
+    Swal.fire({
+      icon: 'success',
+      title: 'Added to Wishlist!',
+      text: `${product.title} has been added to your wishlist.`,
+    });
+  };
+
   return (
     <div className="container px-5 mx-auto my-10">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -90,6 +145,18 @@ const ProductDetailsPage = () => {
               onClick={handleAddToCart}
             >
               Add to Cart
+            </button>
+            <button
+              className="bg-myDgold text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
+              onClick={handleBuyNow}
+            >
+              Buy Now
+            </button>
+            <button
+              className="bg-myDgold text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
+              onClick={handleAddToWishlist}
+            >
+              Add to Wishlist
             </button>
           </div>
         </div>
@@ -199,6 +266,19 @@ const ProductDetailsPage = () => {
               </tbody>
             </table>
           </div>
+        </div>
+      </div>
+
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold">Similar Products</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {similarProducts.map((similarProduct) => (
+            <div key={similarProduct._id} className="border p-4 rounded-lg">
+              <h3 className="font-semibold">{similarProduct.title}</h3>
+              <p className="text-gray-700">PKR {similarProduct.price}</p>
+              <button className="btn-primary mt-2">View Details</button>
+            </div>
+          ))}
         </div>
       </div>
     </div>

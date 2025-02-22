@@ -93,6 +93,7 @@ const Navbar = () => {
               >
                 Contact
               </Link>
+              
             </div>
           </div>
 
@@ -195,6 +196,9 @@ const Navbar = () => {
               onClick={() => setIsMenuOpen(false)}
             >
               Contact
+            </Link>
+            <Link href="/profile" className="text-orange-900 hover:text-orange-700 transition-colors text-center font-medium text-sm uppercase tracking-wide" onClick={() => setIsMenuOpen(false)}>
+              Profile
             </Link>
           </div>
         </div>

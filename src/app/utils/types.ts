@@ -1,6 +1,7 @@
 export interface Product {
   _id: string;
   productName: string;
+  title: string;
   slug: { current: string };
   description: string;
   price: number;
@@ -13,6 +14,8 @@ export interface Product {
     };
   };
   imageUrl: string;
+  fabricType?: string;
+  dimensions?: string;
   stockQuantity: number;
   reviews: Array<{
     rating: number;
@@ -20,4 +23,16 @@ export interface Product {
   }>;
   isNewArrival: boolean;
   isBestSeller: boolean;
+  sizes: { size: string; price: number }[];  // This will allow sizes with prices
+  tags: string[];
+  category: string;
+  inventory: number;
+  colors: string[];
+  materials: string[];
+  careInstructions: string;
+  availability: string;
+  customerReviews: string[];
+  dateAdded: string;
+  shippingInformation: string;
+  specialOffers: string;
 } 

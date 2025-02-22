@@ -1,5 +1,6 @@
 import { defineField, defineType } from 'sanity';
 
+
 export default defineType({
   name: 'product',
   title: 'Product',
@@ -142,6 +143,31 @@ export default defineType({
         source: 'title',
         maxLength: 200, // Optional
       },
+    }),
+    defineField({
+      name: 'reviews',
+      title: 'Reviews',
+      type: 'array',
+      of: [{ type: 'review' }],
+    }),
+    defineField({
+      name: 'stockQuantity',
+      title: 'Stock Quantity',
+      type: 'number',
+      initialValue: 100,
+      validation: (rule) => rule.required().min(0),
+    }),
+    defineField({
+      name: 'isNewArrival',
+      title: 'Is New Arrival',
+      type: 'boolean',
+      initialValue: false,
+    }),
+    defineField({
+      name: 'isBestSeller',
+      title: 'Is Best Seller',
+      type: 'boolean',
+      initialValue: false,
     }),
   ],
 });

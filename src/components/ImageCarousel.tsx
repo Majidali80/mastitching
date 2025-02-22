@@ -32,14 +32,14 @@ const ImageCarousel: React.FC<ImageCarouselProps> = ({ images }) => {
   };
 
   return (
-    <div className="w-[85vw] sm:w-[90vw] md:w-[92vw] lg:w-[95vw] h-[200px] sm:h-[350px] md:h-[450px] lg:h-[600px] relative overflow-hidden rounded-lg">
+    <div className="w-[100vw] sm:w-[100vw] md:w-[100vw] lg:w-[100vw] h-[200px] sm:h-[350px] md:h-[450px] lg:h-[600px] relative overflow-hidden rounded-lg">
       <Slider {...settings}>
         {images.map((image, index) => (
           <div key={index} className="relative h-[200px] sm:h-[350px] md:h-[450px] lg:h-[600px]">
             {/* Image */}
             <Image 
               src={image}
-              width={1200}
+              width={1000}
               height={1000}
               alt={`Slide ${index + 1}`}
               className="w-full h-full object-cover object-center"

@@ -112,12 +112,13 @@ const ProductDetailsPage = () => {
 
     // Add the new review to the reviews state
     setReviews((prevReviews) => [...prevReviews, review]);
-    setReview({ rating: 0, comment: '' });
+    setReview({ rating: 0, comment: '' }); // Reset the form
 
+    // Show success message
     Swal.fire({
       icon: 'success',
       title: 'Review Submitted!',
-      text: 'Thank you for your feedback.',
+      text: 'Your review has been added successfully.',
     });
   };
 

@@ -95,10 +95,10 @@ const BestSelling = () => {
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
-        {products.map((product, index) => {
+        {products.map((product) => {
           const discountedPrice = getDiscountedPrice(product.price, product.discountPercentage);
           const inStock = product.stockQuantity > 0;
-          const averageRating = product.reviews 
+          const averageRating = product.reviews && product.reviews.length > 0 
             ? product.reviews.reduce((acc, rev) => acc + rev.rating, 0) / product.reviews.length 
             : 0;
 

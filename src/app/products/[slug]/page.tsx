@@ -99,7 +99,7 @@ const ProductDetailsPage = () => {
     });
   };
 
-  const handleReviewSubmit = (e) => {
+  const handleReviewSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!review.rating || !review.comment) {
       Swal.fire({

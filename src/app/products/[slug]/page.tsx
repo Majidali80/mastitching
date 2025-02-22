@@ -8,6 +8,7 @@ import Image from "next/image";
 import { useCart } from "../../../app/context/cartContext"; // Import the useCart hook
 
 
+
 const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
   const [selectedSize, setSelectedSize] = useState<string | null>(null);
@@ -118,7 +119,7 @@ const ProductDetailsPage = () => {
     Swal.fire({
       icon: 'success',
       title: 'Review Submitted!',
-      text: 'Your review has been added successfully.',
+      text: 'Thank you for your feedback.',
     });
   };
 

@@ -1,6 +1,7 @@
 "use client";
 
-import { Toaster, toast } from 'react-hot-toast';
+import { toast, ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 // Custom notification types
 export const showNotification = {
@@ -39,9 +40,6 @@ export const showNotification = {
       icon: 'ℹ️',
       style: {
         background: '#fb923c',
-        color: '#fff',
-        padding: '16px',
-        borderRadius: '8px',
       },
     });
   },
@@ -58,39 +56,9 @@ export const showNotification = {
   },
 };
 
-export default function Notifications() {
-  return (
-    <Toaster
-      position="top-right"
-      reverseOrder={false}
-      gutter={8}
-      containerClassName=""
-      containerStyle={{}}
-      toastOptions={{
-        // Default options for all toasts
-        className: '',
-        duration: 3000,
-        style: {
-          background: '#fb923c',
-          color: '#fff',
-        },
-        // Custom success styles
-        success: {
-          duration: 3000,
-          iconTheme: {
-            primary: '#fff',
-            secondary: '#fb923c',
-          },
-        },
-        // Custom error styles
-        error: {
-          duration: 4000,
-          iconTheme: {
-            primary: '#fff',
-            secondary: '#ef4444',
-          },
-        },
-      }}
-    />
-  );
-} 
+// Export the ToastContainer to be used in your main component
+export const NotificationContainer = () => (
+  <ToastContainer />
+);
+
+export default showNotification; 

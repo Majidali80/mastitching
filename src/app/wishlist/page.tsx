@@ -5,7 +5,7 @@ import { FaHeart, FaShoppingCart } from "react-icons/fa";
 import Image from "next/image";
 import { useCart } from "@/app/context/cartContext";
 import sanityClient, { urlFor } from "@/sanity/lib/client";
-import { Product } from "@/app/utils/types";
+import { Product } from "@/types/product";
 import { motion, AnimatePresence } from 'framer-motion';
 import { showNotification } from '@/components/ui/Notifications';
 
@@ -24,7 +24,7 @@ export default function Wishlist() {
   useEffect(() => {
     async function fetchProducts() {
       try {
-        const products = await sanityClient.fetch('*[_type == "product"]{ _id, title, description, price, image, slug, productImage }');
+        const products = await sanityClient.fetch('*[_type == "product"]{ _id, title, description, price, images, slug }');
         setProducts(products);
       } catch (error) {
         showNotification.error('Failed to fetch products');
@@ -50,6 +50,18 @@ export default function Wishlist() {
     asset: {
       url: "/default-image.jpg", // Path to your default image
     },
+  };
+
+  const handleAddToCart = (product: Product) => {
+    const formattedProductImage = product.images.length > 0
+      ? { asset: { url: urlFor(product.images[0].asset).url() } } // Use the first image in the images array
+      : defaultImage; // Fallback to default image
+
+    addToCart({
+      ...product,
+      productImage: formattedProductImage.asset.url, // Ensure this property exists in the Product interface
+    });
+    showNotification.success('Added to cart');
   };
 
   return (
@@ -94,9 +106,9 @@ export default function Wishlist() {
                   >
                     <Link href={`/products/${product.slug.current}`}>
                       <div className="relative h-64">
-                        {product.image ? (
+                        {product.images.length > 0 ? (
                           <Image
-                            src={urlFor(product.image).url()}
+                            src={urlFor(product.images[0].asset).url()}
                             alt={product.title}
                             fill
                             className="object-cover"
@@ -127,15 +139,7 @@ export default function Wishlist() {
                       <div className="flex justify-between items-center mt-4">
                         <button
                           onClick={() => {
-                            const formattedProductImage = typeof product.productImage === "string"
-                              ? { asset: { url: product.productImage } }
-                              : product.productImage || defaultImage;
-
-                            addToCart({
-                              ...product,
-                              productImage: formattedProductImage.asset.url,
-                            });
-                            showNotification.success('Added to cart');
+                            handleAddToCart(product);
                           }}
                           className="flex items-center gap-2 px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition-colors"
                         >

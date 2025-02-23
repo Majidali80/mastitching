@@ -10,7 +10,7 @@
   import { useCart } from "../app/context/cartContext";
   import Image from "next/image";
   import React from 'react';
-  import { showNotification } from "../components/ui/Notifications";
+
 
   const BestSelling = () => {
     const [products, setProducts] = useState<Product[]>([]); // Standard products state
@@ -45,15 +45,13 @@
     }, [wishlist]);
 
     // Handling wishlist toggles
-    const handleWishlistToggle = (productId: string, productName: string) => {
+    const handleWishlistToggle = (productId: string) => {
       setWishlist((prevWishlist) => {
         const updatedWishlist = new Set(prevWishlist);
         if (updatedWishlist.has(productId)) {
           updatedWishlist.delete(productId);
-          showNotification.info(`${productName} removed from wishlist`);
         } else {
           updatedWishlist.add(productId);
-          showNotification.success(`${productName} added to wishlist`);
         }
         return updatedWishlist;
       });
@@ -63,7 +61,6 @@
     const handleAddToCart = (product: Product) => {
       if (product.stockQuantity > 0) { // Only add to cart if in stock
         addToCart({ ...product, selectedSize: 'default', quantity: 1 });
-        showNotification.success(`${product.productName} added to cart`);
         setShowPopup(true); // Show the popup when an item is added
       }
     };
@@ -195,7 +192,7 @@
                     onClick={(e) => {
                       e.preventDefault();
                       e.stopPropagation();
-                      handleWishlistToggle(product._id, product.productName);
+                      handleWishlistToggle(product._id);
                     }}
                     className={`p-3 rounded-full shadow-md focus:outline-none transition-colors ${
                       wishlist.has(product._id)

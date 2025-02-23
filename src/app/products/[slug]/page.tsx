@@ -3,9 +3,12 @@ import React, { useState, useEffect } from 'react';
 import Swal from "sweetalert2"; // Make sure SweetAlert2 is imported
 import { useParams, useRouter } from "next/navigation";
 import client, { urlFor } from "../../../sanity/lib/client"; // Import urlFor
-import { Product } from "../../../app/utils/types";
+import { Product, SizeOption } from "../../../types/product"; // Import SizeOption
 import Image from "next/image";
 import { useCart } from "../../../app/context/cartContext"; // Import the useCart hook
+import Link from "next/link";
+import SizeGuide from '../../../components/SizeGuide'; // Import the SizeGuide component
+import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa'; // Import social media icons
 
 const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
@@ -16,8 +19,10 @@ const ProductDetailsPage = () => {
 
   const { addToCart } = useCart(); // Access the addToCart function from context
   
-  const [reviews, setReviews] = useState<{ rating: number; comment: string }[]>([]);
-  const [review, setReview] = useState({ rating: 0, comment: '' });
+  const [reviews, setReviews] = useState<{ rating: number; comment: string; image?: string }[]>([]);
+  const [review, setReview] = useState({ rating: 0, comment: '', image: '' });
+
+  const [showSizeGuide, setShowSizeGuide] = useState(false); // State to control modal visibility
 
   useEffect(() => {
     if (slug) {
@@ -111,7 +116,7 @@ const ProductDetailsPage = () => {
 
     // Add the new review to the reviews state
     setReviews((prevReviews) => [...prevReviews, review]);
-    setReview({ rating: 0, comment: '' }); // Reset the form
+    setReview({ rating: 0, comment: '', image: '' }); // Reset the form
 
     // Show success message
     Swal.fire({
@@ -119,6 +124,61 @@ const ProductDetailsPage = () => {
       title: 'Review Submitted!',
       text: 'Thank you for your feedback.',
     });
+  };
+
+  // Use the first image from the images array
+  const productImage = product.images.length > 0 ? urlFor(product.images[0]).url() : '/default-image.jpg';
+
+  const RelatedProducts = () => {
+    const [relatedProducts, setRelatedProducts] = useState<Product[]>([]);
+
+    useEffect(() => {
+      const fetchRelatedProducts = async () => {
+        const query = `*[_type == "product" && category == $category && _id != $id]`;
+        const related = await client.fetch(query, { category: product.category, id: product._id });
+        setRelatedProducts(related);
+      };
+
+      if (product) {
+        fetchRelatedProducts();
+      }
+    }, [product]);
+
+    return (
+      <div className="mt-10">
+        <h2 className="text-2xl font-bold">Related Products</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          {relatedProducts.map((relatedProduct) => (
+            <Link key={relatedProduct._id} href={`/products/${relatedProduct.slug.current}`}>
+              <div className="bg-white rounded-lg shadow-md p-4">
+                <Image src={urlFor(relatedProduct.images[0]).url()} alt={relatedProduct.title} width={200} height={200} />
+                <h3 className="text-lg font-semibold">{relatedProduct.title}</h3>
+                <p className="text-gray-600">PKR {relatedProduct.price}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const shareProduct = (platform: string) => {
+    const url = window.location.href; // Get the current URL
+    const message = `Check out this product: ${product.title}`;
+    
+    switch (platform) {
+      case 'facebook':
+        window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'twitter':
+        window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}&url=${encodeURIComponent(url)}`, '_blank');
+        break;
+      case 'instagram':
+        alert("Instagram sharing is not supported via URL. Please share manually.");
+        break;
+      default:
+        break;
+    }
   };
 
   return (
@@ -130,15 +190,13 @@ const ProductDetailsPage = () => {
               {product.discountPercentage}% OFF
             </span>
           )}
-          {product.image && (
-            <Image
-              src={urlFor(product.image).url()}
-              alt={product.title}
-              width={500}
-              height={100}
-              className="w-full h-auto object-cover border-orange-900"
-            />
-          )}
+          <Image
+            src={productImage}
+            alt={product.title}
+            width={500}
+            height={100}
+            className="w-full h-auto object-cover border-orange-900"
+          />
 
           <div className="mt-6 flex justify-center gap-4">
             <button
@@ -153,7 +211,6 @@ const ProductDetailsPage = () => {
             >
               Buy Now
             </button>
-            
           </div>
         </div>
 
@@ -182,7 +239,7 @@ const ProductDetailsPage = () => {
                 <option value="" disabled>
                   Select a Size
                 </option>
-                {product.sizes.map((sizeOption, index) => (
+                {product.sizes.map((sizeOption: SizeOption, index: number) => (
                   <option key={index} value={sizeOption.size}>
                     {sizeOption.size} - PKR {sizeOption.price}
                   </option>
@@ -292,6 +349,15 @@ const ProductDetailsPage = () => {
               rows={4}
             />
           </div>
+          <div className="mt-4">
+            <label className="block mb-2">Image URL (optional):</label>
+            <input
+              type="text"
+              value={review.image}
+              onChange={(e) => setReview({ ...review, image: e.target.value })}
+              className="border rounded p-2 w-full"
+            />
+          </div>
           <button type="submit" className="bg-myDgold text-white py-2 px-4 rounded mt-4">
             Submit Review
           </button>
@@ -304,11 +370,46 @@ const ProductDetailsPage = () => {
               <div key={index} className="border p-4 mt-2 rounded">
                 <p className="font-semibold">Rating: {rev.rating} Stars</p>
                 <p>{rev.comment}</p>
+                {rev.image && (
+                  <Image
+                    src={rev.image}
+                    alt={`Review image ${index + 1}`}
+                    width={100}
+                    height={100}
+                    className="mt-2 rounded"
+                  />
+                )}
               </div>
             ))
           ) : (
             <p>No reviews yet.</p>
           )}
+        </div>
+      </div>
+
+      <RelatedProducts />
+
+      <button
+        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+        onClick={() => setShowSizeGuide(true)}
+      >
+        View Size Guide
+      </button>
+
+      {showSizeGuide && <SizeGuide />} {/* Render the SizeGuide component */}
+
+      <div className="mt-4">
+        <h3 className="text-lg font-semibold">Share this product:</h3>
+        <div className="flex space-x-4">
+          <button onClick={() => shareProduct('facebook')} className="text-blue-600">
+            <FaFacebook size={24} />
+          </button>
+          <button onClick={() => shareProduct('twitter')} className="text-blue-400">
+            <FaTwitter size={24} />
+          </button>
+          <button onClick={() => shareProduct('instagram')} className="text-pink-600">
+            <FaInstagram size={24} />
+          </button>
         </div>
       </div>
     </div>

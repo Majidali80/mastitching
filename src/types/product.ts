@@ -1,5 +1,10 @@
 // types.ts
 
+export interface SizeOption {
+  size: string; // The size name (e.g., "M", "L", "XL")
+  price: number; // The price associated with the size
+}
+
 export interface Product {
   _id: string;
   _type: 'product';
@@ -28,5 +33,6 @@ export interface Product {
   isNewArrival: boolean;
   isBestSeller: boolean;
   productName: string;
+  sizes: SizeOption[]; // Ensure sizes is of type SizeOption[]
 }
 

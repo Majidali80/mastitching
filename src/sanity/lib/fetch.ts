@@ -1,10 +1,10 @@
 import { createClient } from "next-sanity";
 
 const client = createClient({
-  projectId: "p72g6oqi",
+  projectId: "1foejx3i",
   dataset: "production",
   useCdn: true,
-  apiVersion: '2025-01-13',
+  apiVersion: '2024-03-19',
 });
 
 export async function sanityFetch({

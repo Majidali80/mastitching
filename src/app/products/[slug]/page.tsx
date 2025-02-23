@@ -8,7 +8,9 @@ import Image from "next/image";
 import { useCart } from "../../../app/context/cartContext"; // Import the useCart hook
 import Link from "next/link";
 import SizeGuide from '../../../components/SizeGuide'; // Import the SizeGuide component
-import { FaFacebook, FaTwitter, FaInstagram } from 'react-icons/fa'; // Import social media icons
+import { FaFacebook, FaTwitter, FaInstagram, FaWhatsapp } from 'react-icons/fa'; // Import social media icons and WhatsApp icon
+import WhatsAppPopup from '../../../components/WhatsAppPopup'; // Import the WhatsAppPopup component
+import ImageZoom from '../../../components/ImageZoom'; // Import the ImageZoom component
 
 const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
@@ -26,6 +28,10 @@ const ProductDetailsPage = () => {
 
   const whatsappNumber = "1234567890"; // Replace with your WhatsApp number
   const predefinedMessage = `Hello, I have a question about the product: ${product?.title}`;
+
+  const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false); // State to control WhatsApp popup visibility
+
+  const [zoomedImage, setZoomedImage] = useState<string | null>(null); // State for the zoomed image
 
   useEffect(() => {
     if (slug) {
@@ -201,7 +207,23 @@ const ProductDetailsPage = () => {
             width={500}
             height={100}
             className="w-full h-auto object-cover border-orange-900"
+            onClick={() => setZoomedImage(productImage)} // Open zoom on main image click
           />
+
+          {/* Thumbnails Section */}
+          <div className="flex space-x-2 mt-4">
+            {product.images.slice(0, 3).map((image, index) => (
+              <Image
+                key={index}
+                src={urlFor(image).url()}
+                alt={`Thumbnail ${index + 1}`}
+                width={100}
+                height={100}
+                className="cursor-pointer border rounded"
+                onClick={() => setZoomedImage(urlFor(image).url())} // Set zoomed image on thumbnail click
+              />
+            ))}
+          </div>
 
           <div className="mt-6 flex justify-center gap-4">
             <button
@@ -230,8 +252,8 @@ const ProductDetailsPage = () => {
           </button>
         </div>
       </div>
+      
           </div>
-          
         </div>
 
         <div>
@@ -407,16 +429,27 @@ const ProductDetailsPage = () => {
         </div>
       </div>
 
-      <div className="mt-4">
-        <a
-          href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(predefinedMessage)}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="bg-green-500 text-white px-4 py-2 rounded"
+      {/* WhatsApp Icon */}
+      <div className="fixed bottom-4 right-4 z-50">
+        <button
+          className="bg-green-500 text-white p-3 rounded-full shadow-lg"
+          onClick={() => setShowWhatsAppPopup((prev) => !prev)} // Toggle visibility
         >
-          Chat with us on WhatsApp
-        </a>
+          <FaWhatsapp size={24} />
+        </button>
       </div>
+
+      {showWhatsAppPopup && (
+        <WhatsAppPopup
+          onClose={() => setShowWhatsAppPopup(false)}
+          whatsappNumber={whatsappNumber} // Pass the WhatsApp number
+          predefinedMessage={predefinedMessage} // Pass the predefined message
+        />
+      )}
+
+      {zoomedImage && (
+        <ImageZoom imageUrl={zoomedImage} onClose={() => setZoomedImage(null)} /> // Render the zoomed image modal
+      )}
 
       <RelatedProducts />
     </div>

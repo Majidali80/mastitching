@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
+import { FaSearchPlus, FaSearchMinus } from 'react-icons/fa';
 
 interface ImageZoomProps {
   imageUrl: string;
@@ -33,16 +34,16 @@ const ImageZoom: React.FC<ImageZoomProps> = ({ imageUrl, onClose }) => {
         />
         <div className="absolute bottom-2 left-2 flex space-x-2">
           <button
-            className="bg-white text-black px-4 py-2 rounded"
+            className="bg-white text-black p-2 rounded"
             onClick={handleZoomIn}
           >
-            Zoom In
+            <FaSearchPlus size={24} />
           </button>
           <button
-            className="bg-white text-black px-4 py-2 rounded"
+            className="bg-white text-black p-2 rounded"
             onClick={handleZoomOut}
           >
-            Zoom Out
+            <FaSearchMinus size={24} />
           </button>
         </div>
       </div>

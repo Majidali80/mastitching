@@ -10,6 +10,7 @@ export interface Product {
   dimensions: string;
   price: number;
   images: { _type: 'image'; asset: { _ref: string; _type: 'reference' } }[];
+  productImage?: { asset: { url: string } };
   tags: string[];
   category: string;
   inventory: number;

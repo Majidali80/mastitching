@@ -42,5 +42,7 @@ export interface Stitching {
     isBestSeller?: boolean;
     rating?: number;
     reviews?: Review[];
+    images: string[];
+    description: string;
 }
   

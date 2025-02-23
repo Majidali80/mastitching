@@ -6,7 +6,6 @@ import { IoMdClose } from 'react-icons/io';
 import Link from 'next/link';
 import client from '@/sanity/lib/client';
 import { useDebounce } from '@/hooks/useDebounce';
-import { showNotification } from './ui/Notifications';
 
 interface Product {
   _id: string;
@@ -61,7 +60,6 @@ export default function SearchBar() {
         const searchResults = await client.fetch(query);
         setResults(searchResults);
       } catch (error) {
-        showNotification.error('Error searching products');
         console.error('Search error:', error);
       } finally {
         setIsLoading(false);

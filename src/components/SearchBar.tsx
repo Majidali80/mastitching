@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { FaSearch } from 'react-icons/fa';
 import { IoMdClose } from 'react-icons/io';
 import Link from 'next/link';
-import { client } from '@/sanity/lib/client';
+import client from '@/sanity/lib/client';
 import { useDebounce } from '@/hooks/useDebounce';
 import { showNotification } from './ui/Notifications';
 

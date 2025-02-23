@@ -2,12 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import Swal from "sweetalert2"; // Make sure SweetAlert2 is imported
 import { useParams, useRouter } from "next/navigation";
-import { client, urlFor } from "../../../sanity/lib/client";
+import client, { urlFor } from "../../../sanity/lib/client"; // Import urlFor
 import { Product } from "../../../app/utils/types";
 import Image from "next/image";
 import { useCart } from "../../../app/context/cartContext"; // Import the useCart hook
-
-
 
 const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | null>(null);

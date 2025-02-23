@@ -24,6 +24,9 @@ const ProductDetailsPage = () => {
 
   const [showSizeGuide, setShowSizeGuide] = useState(false); // State to control modal visibility
 
+  const whatsappNumber = "1234567890"; // Replace with your WhatsApp number
+  const predefinedMessage = `Hello, I have a question about the product: ${product?.title}`;
+
   useEffect(() => {
     if (slug) {
       const fetchProductDetails = async () => {
@@ -134,15 +137,17 @@ const ProductDetailsPage = () => {
 
     useEffect(() => {
       const fetchRelatedProducts = async () => {
+        if (!product) return; // Ensure product is defined before fetching
         const query = `*[_type == "product" && category == $category && _id != $id]`;
         const related = await client.fetch(query, { category: product.category, id: product._id });
         setRelatedProducts(related);
       };
 
+      // Only fetch related products if product is defined
       if (product) {
         fetchRelatedProducts();
       }
-    }, [product]);
+    }, [product]); // Only depend on product itself
 
     return (
       <div className="mt-10">
@@ -211,7 +216,22 @@ const ProductDetailsPage = () => {
             >
               Buy Now
             </button>
+             <div className="mt-4">
+        <h3 className="text-lg font-semibold"></h3>
+        <div className="flex space-x-4">
+          <button onClick={() => shareProduct('facebook')} className="text-blue-600">
+            <FaFacebook size={24} />
+          </button>
+          <button onClick={() => shareProduct('twitter')} className="text-blue-400">
+            <FaTwitter size={24} />
+          </button>
+          <button onClick={() => shareProduct('instagram')} className="text-pink-600">
+            <FaInstagram size={24} />
+          </button>
+        </div>
+      </div>
           </div>
+          
         </div>
 
         <div>
@@ -245,6 +265,14 @@ const ProductDetailsPage = () => {
                   </option>
                 ))}
               </select>
+              <button
+        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
+        onClick={() => setShowSizeGuide(true)}
+      >
+        View Size Guide
+      </button>
+
+      {showSizeGuide && <SizeGuide />} {/* Render the SizeGuide component */}
             </div>
           )}
 
@@ -349,15 +377,7 @@ const ProductDetailsPage = () => {
               rows={4}
             />
           </div>
-          <div className="mt-4">
-            <label className="block mb-2">Image URL (optional):</label>
-            <input
-              type="text"
-              value={review.image}
-              onChange={(e) => setReview({ ...review, image: e.target.value })}
-              className="border rounded p-2 w-full"
-            />
-          </div>
+         
           <button type="submit" className="bg-myDgold text-white py-2 px-4 rounded mt-4">
             Submit Review
           </button>
@@ -387,31 +407,18 @@ const ProductDetailsPage = () => {
         </div>
       </div>
 
-      <RelatedProducts />
-
-      <button
-        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded"
-        onClick={() => setShowSizeGuide(true)}
-      >
-        View Size Guide
-      </button>
-
-      {showSizeGuide && <SizeGuide />} {/* Render the SizeGuide component */}
-
       <div className="mt-4">
-        <h3 className="text-lg font-semibold">Share this product:</h3>
-        <div className="flex space-x-4">
-          <button onClick={() => shareProduct('facebook')} className="text-blue-600">
-            <FaFacebook size={24} />
-          </button>
-          <button onClick={() => shareProduct('twitter')} className="text-blue-400">
-            <FaTwitter size={24} />
-          </button>
-          <button onClick={() => shareProduct('instagram')} className="text-pink-600">
-            <FaInstagram size={24} />
-          </button>
-        </div>
+        <a
+          href={`https://wa.me/${whatsappNumber}?text=${encodeURIComponent(predefinedMessage)}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="bg-green-500 text-white px-4 py-2 rounded"
+        >
+          Chat with us on WhatsApp
+        </a>
       </div>
+
+      <RelatedProducts />
     </div>
   );
 };

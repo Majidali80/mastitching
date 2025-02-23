@@ -12,6 +12,7 @@
     "@radix-ui/react-slot": "^1.1.2",
     "@sanity/client": "^6.28.0",
     "@sanity/image-url": "^1.1.0",
+    "@sanity/structure": "^2.36.2",
     "@sanity/types": "^3.76.3",
     "@sanity/vision": "^3.76.3",
     "@types/nodemailer": "^6.4.17",

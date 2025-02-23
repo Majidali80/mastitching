@@ -1,3 +1,9 @@
+export interface Review {
+    _type: 'review';
+    reviewText: string;
+    rating: number;
+}
+
 export interface Stitching {
     _id: string;
     _type: 'stitching';
@@ -9,6 +15,7 @@ export interface Stitching {
     stitchingDescription: string;
     additionalOptions: string[];
     isCustomizable: boolean;
+    price: number;
     priceAdjustment: number;
     availability: string;
     stitchingNotes: string;
@@ -32,5 +39,8 @@ export interface Stitching {
     };
     uploadDesign: { _type: 'image'; asset: { _ref: string; _type: 'reference' } };
     uploadSizeChart: { _type: 'file'; asset: { _ref: string; _type: 'reference' } };
-  }
+    isBestSeller?: boolean;
+    rating?: number;
+    reviews?: Review[];
+}
   

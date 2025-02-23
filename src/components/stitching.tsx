@@ -96,7 +96,7 @@ const StitchingPage = () => {
               )}
             </div>
 
-            <Link href={`/stitched-products/${stitchedProduct._id}`}>
+            <Link href={`/stitched-products/${stitchedProduct._id}`}> 
               {/* Product Image */}
               <div className="relative aspect-square mb-4">
                 {stitchedProduct.stitchingImage ? (

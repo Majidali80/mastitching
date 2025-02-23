@@ -7,7 +7,7 @@ import { useCart } from "@/app/context/cartContext";
 import sanityClient, { urlFor } from "@/sanity/lib/client";
 import { Product } from "@/types/product";
 import { motion, AnimatePresence } from 'framer-motion';
-import { showNotification } from '@/components/ui/Notifications';
+import Swal from "sweetalert2";
 
 export default function Wishlist() {
   const [products, setProducts] = useState<Product[]>([]);
@@ -27,7 +27,6 @@ export default function Wishlist() {
         const products = await sanityClient.fetch('*[_type == "product"]{ _id, title, description, price, images, slug }');
         setProducts(products);
       } catch (error) {
-        showNotification.error('Failed to fetch products');
         console.error('Error fetching products:', error);
       }
     }
@@ -35,14 +34,25 @@ export default function Wishlist() {
   }, []);
 
   const handleRemoveFromWishlist = (productId: string) => {
-    const updatedWishlist = new Set(wishlist);
-    updatedWishlist.delete(productId);
-    setWishlist(updatedWishlist);
+    Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#3085d6',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const updatedWishlist = new Set(wishlist);
+        updatedWishlist.delete(productId);
+        setWishlist(updatedWishlist);
 
-    if (typeof window !== "undefined") {
-      localStorage.setItem("wishlist", JSON.stringify([...updatedWishlist]));
-    }
-    showNotification.success('Removed from wishlist');
+        if (typeof window !== "undefined") {
+          localStorage.setItem("wishlist", JSON.stringify([...updatedWishlist]));
+        }
+      }
+    });
   };
 
   // Fallback image object
@@ -61,7 +71,6 @@ export default function Wishlist() {
       ...product,
       productImage: formattedProductImage.asset.url, // Ensure this property exists in the Product interface
     });
-    showNotification.success('Added to cart');
   };
 
   return (

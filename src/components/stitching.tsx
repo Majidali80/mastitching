@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { Stitching } from "../types/stitching"; // Import Stitching interface
-import client from "../sanity/lib/client";
+import client from '../sanity/lib/client'; // Ensure this path is correct
 import { urlFor } from "../sanity/lib/client";
 import { stitchedProductsQuery } from '../sanity/lib/queries';
 import Link from 'next/link';
@@ -88,13 +88,13 @@ const StitchingPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
         {stitchedProducts.map((stitchedProduct: Stitching) => (
           <div key={stitchedProduct._id} className="relative bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-2xl transition-all">
-            <Link href={`/stitching/${stitchedProduct.slug.current}`}>
+            <Link href={stitchedProduct.slug && stitchedProduct.slug.current ? `/stitching/${stitchedProduct.slug.current}` : '#'}>
               {/* Product Image */}
               <div className="relative aspect-square mb-4">
                 {stitchedProduct.stitchingImage ? (
                   <Image
                     src={urlFor(stitchedProduct.stitchingImage).url()}
-                    alt={stitchedProduct.stitchType}
+                    alt={`${stitchedProduct.title} - Stitching image`}
                     fill
                     className="object-cover rounded-lg"
                     priority

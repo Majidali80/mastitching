@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { Stitching } from "../types/stitching"; // Import Stitching interface
 import client from "../sanity/lib/client";
 import { urlFor } from "../sanity/lib/client";
-import { stitchedProductQuery } from '../sanity/lib/queries';
+import { stitchedProductsQuery } from '../sanity/lib/queries';
 import Link from 'next/link';
 import { useCart } from "../app/context/cartContext";
 import { FaRegHeart, FaHeart, FaShoppingCart, FaStar, FaRegStar } from "react-icons/fa";
@@ -24,7 +24,7 @@ const StitchingPage = () => {
 
   useEffect(() => {
     async function fetchStitchedProducts() {
-      const fetchedStitchedProducts: Stitching[] = await client.fetch(stitchedProductQuery);
+      const fetchedStitchedProducts: Stitching[] = await client.fetch(stitchedProductsQuery);
       setStitchedProducts(fetchedStitchedProducts);
     }
     fetchStitchedProducts();
@@ -88,15 +88,7 @@ const StitchingPage = () => {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
         {stitchedProducts.map((stitchedProduct: Stitching) => (
           <div key={stitchedProduct._id} className="relative bg-white rounded-lg shadow-lg p-6 cursor-pointer hover:shadow-2xl transition-all">
-            <div className="absolute top-10 right-6 flex flex-col gap-2 z-10">
-              {stitchedProduct.isBestSeller && (
-                <span className="bg-orange-500 text-white text-xs font-semibold py-1 px-3 rounded-full">
-                  Best Seller
-                </span>
-              )}
-            </div>
-
-            <Link href={`/stitched-products/${stitchedProduct._id}`}> 
+            <Link href={`/stitching/${stitchedProduct.slug.current}`}>
               {/* Product Image */}
               <div className="relative aspect-square mb-4">
                 {stitchedProduct.stitchingImage ? (

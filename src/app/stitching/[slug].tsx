@@ -1,126 +1,176 @@
+// app/stitching/[slug]/page.tsx
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { useParams } from "next/navigation";
-import client, { urlFor } from "../../sanity/lib/client"; // Import urlFor
-import { Stitching } from "../../types/stitching"; // Import Stitching interface
-import Image from "next/image";
-import { useCart } from "../../app/context/cartContext"; // Import the useCart hook
-import Swal from "sweetalert2"; // Import SweetAlert2 for alerts
-import WhatsAppPopup from '../../components/WhatsAppPopup'; // Ensure this path is correct
-import ImageZoom from '../../components/ImageZoom'; // Ensure this path is correct
-import { FaWhatsapp } from 'react-icons/fa'; // Import social media icons
-import { stitchedProductQuery } from '../../sanity/lib/queries'; // Import the stitched product query
+import Image from 'next/image';
+import { Stitching } from '../../types/stitching'; // Import Stitching interface
+import client from '../../sanity/lib/client'; // Ensure this path is correct
+import { urlFor } from "../../sanity/lib/client";
+import { stitchingProductQuery } from '../../sanity/lib/queries';
+import { useCart } from "../../app/context/cartContext";
+import { FaRegHeart, FaHeart, FaShoppingCart, FaStar, FaRegStar } from "react-icons/fa";
+import Link from 'next/link';
 
-const StitchingProductPage = () => {
-  const { slug } = useParams();
-  const { addToCart } = useCart(); // Access the addToCart function from context
-
+const StitchingProductPage = ({ params }: { params: { slug: string } }) => {
   const [stitchedProduct, setStitchedProduct] = useState<Stitching | null>(null);
-  const [zoomedImage, setZoomedImage] = useState<string | null>(null); // State for the zoomed image
-  const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false); // State to control WhatsApp popup visibility
-  const [ setReviews] = useState<{ rating: number; comment: string; image?: string }[]>([]);
-  const [review, setReview] = useState({ rating: 0, comment: '', image: '' });
+  const [wishlist, setWishlist] = useState<Set<string>>(() => {
+    if (typeof window !== "undefined") {
+      const storedWishlist = localStorage.getItem("wishlist");
+      return storedWishlist ? new Set<string>(JSON.parse(storedWishlist)) : new Set<string>();
+    }
+    return new Set<string>();
+  });
+  const { cart, addToCart } = useCart();
+  const totalItemsInCart = cart.reduce((total, item) => total + item.quantity, 0);
 
   useEffect(() => {
-    const fetchStitchedProductDetails = async () => {
-      try {
-        const productDetails = await client.fetch(stitchedProductQuery, { slug });
-        setStitchedProduct(productDetails);
-        setReviews(productDetails.reviews || []);
-      } catch (error) {
-        console.error("Error fetching stitched product details:", error);
-      }
-    };
-
-    if (slug) {
-      fetchStitchedProductDetails();
+    async function fetchStitchedProduct() {
+      const fetchedStitchedProduct: Stitching = await client.fetch(stitchingProductQuery, { slug: params.slug });
+      setStitchedProduct(fetchedStitchedProduct);
     }
-  }, [slug]);
+    fetchStitchedProduct();
+  }, [params.slug]);
 
-  if (!stitchedProduct) {
-    return <div>Loading product details...</div>;
-  }
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      localStorage.setItem("wishlist", JSON.stringify([...wishlist]));
+    }
+  }, [wishlist]);
 
-  const handleAddToCart = () => {
-    addToCart({ ...stitchedProduct, selectedSize: 'default', quantity: 1 });
-    Swal.fire({
-      icon: 'success',
-      title: 'Added to Cart!',
-      text: `${stitchedProduct.stitchType} has been added to your cart.`,
+  // Handle Wishlist toggle
+  const handleWishlistToggle = (productId: string) => {
+    setWishlist((prevWishlist) => {
+      const updatedWishlist = new Set(prevWishlist);
+      if (updatedWishlist.has(productId)) {
+        updatedWishlist.delete(productId);
+      } else {
+        updatedWishlist.add(productId);
+      }
+      return updatedWishlist;
     });
   };
 
-  return (
-    <div className="container px-5 mx-auto my-10">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="relative">
-          <Image
-            src={urlFor(stitchedProduct.stitchingImage).url()}
-            alt={stitchedProduct.stitchType}
-            width={500}
-            height={500}
-            className="w-full h-auto object-cover border-orange-900"
-            onClick={() => setZoomedImage(urlFor(stitchedProduct.stitchingImage).url())} // Open zoom on main image click
-          />
+  // Handle Add to Cart
+  const handleAddToCart = (stitchedProduct: Stitching) => {
+    addToCart({ ...stitchedProduct, selectedSize: 'default', quantity: 1 });
+  };
 
-          {/* Thumbnails Section */}
-          <div className="flex space-x-2 mt-4">
-            {stitchedProduct.images.slice(0, 3).map((image, index) => (
-              <Image
-                key={index}
-                src={urlFor(image).url()}
-                alt={`Thumbnail ${index + 1}`}
-                width={100}
-                height={100}
-                className="cursor-pointer border rounded"
-                onClick={() => setZoomedImage(urlFor(image).url())} // Set zoomed image on thumbnail click
-              />
-            ))}
+  const StarRating = ({ rating }: { rating: number }) => (
+    <div className="flex">
+      {[1, 2, 3, 4, 5].map((star) => (
+        <span key={star}>
+          {star <= rating ? (
+            <FaStar className="text-yellow-400" />
+          ) : (
+            <FaRegStar className="text-yellow-400" />
+          )}
+        </span>
+      ))}
+    </div>
+  );
+
+  if (!stitchedProduct) {
+    return <div>Loading...</div>;
+  }
+
+  return (
+    <div className="mb-[100px] mt-[100px] overflow-hidden">
+      <div className="container px-5 mx-auto">
+        <div className="text-center mb-10">
+          <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl text-orange-500 mb-4">
+            {stitchedProduct.title}
+          </h1>
+          <p className="text-lg text-gray-600 mb-6">
+            {stitchedProduct.description}
+          </p>
+          <div className="flex mt-2 justify-center">
+            <div className="w-16 h-1 rounded-full bg-orange-500 inline-flex" />
+          </div>
+        </div>
+      </div>
+
+      {/* Displaying Stitched Product Details */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 px-4">
+        {/* Product Image */}
+        <div className="relative aspect-square mb-4">
+          {stitchedProduct.stitchingImage ? (
+            <Image
+              src={urlFor(stitchedProduct.stitchingImage).url()}
+              alt={`${stitchedProduct.title} - Stitching image`}
+              fill
+              className="object-cover rounded-lg"
+              priority
+            />
+          ) : (
+            <div className="w-full h-full bg-gray-200 rounded-lg flex items-center justify-center">
+              <p className="text-gray-500">No image available</p>
+            </div>
+          )}
+        </div>
+
+        {/* Product Details */}
+        <div className="flex flex-col justify-center">
+          <h2 className="text-lg font-bold text-gray-800 truncate">{stitchedProduct.stitchType}</h2>
+
+          {/* Price Section */}
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-col">
+              <span className="line-through text-gray-500">PKR {stitchedProduct.price}</span>
+              <span className="text-red-500 font-bold">PKR {stitchedProduct.priceAdjustment}</span>
+            </div>
           </div>
 
-          <div className="mt-6 flex justify-center gap-4">
+          {/* Rating and Reviews */}
+          <div className="flex items-center justify-between mb-4">
+            <StarRating rating={stitchedProduct.rating || 0} />
+            <span className="text-sm text-gray-600">({stitchedProduct.reviews ? stitchedProduct.reviews.length : 0} reviews)</span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex justify-center items-center space-x-4 mt-4">
             <button
-              className="bg-orange-900 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-              onClick={handleAddToCart}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleWishlistToggle(stitchedProduct._id);
+              }}
+              className={`p-3 rounded-full shadow-md focus:outline-none transition-colors ${
+                wishlist.has(stitchedProduct._id)
+                  ? 'bg-orange-500 text-white'
+                  : 'bg-gray-100 text-gray-500 hover:bg-orange-500 hover:text-white'
+              }`}
+              title={wishlist.has(stitchedProduct._id) ? 'Remove from Wishlist' : 'Add to Wishlist'}
             >
-              Add to Cart
+              {wishlist.has(stitchedProduct._id) ? <FaHeart size={24} /> : <FaRegHeart size={24} />}
+            </button>
+
+            <button
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleAddToCart(stitchedProduct);
+              }}
+              className="p-3 rounded-full shadow-md focus:outline-none transition-colors bg-orange-500 text-white hover:bg-orange-600"
+            >
+              <FaShoppingCart size={24} />
             </button>
           </div>
         </div>
-
-        <div>
-          <h1 className="text-3xl font-bold text-orange-900">{stitchedProduct.stitchType}</h1>
-          <p className="text-gray-700 mt-4">{stitchedProduct.description}</p>
-          <p className="text-lg font-semibold mt-4">
-            Price: <span className="text-red-500 font-bold">PKR {stitchedProduct.priceAdjustment}</span>
-          </p>
-        </div>
       </div>
 
-      {zoomedImage && (
-        <ImageZoom imageUrl={zoomedImage} onClose={() => setZoomedImage(null)} /> // Render the zoomed image modal
-      )}
-
-      {/* WhatsApp Icon */}
-      <div className="fixed bottom-4 right-4 z-50">
-        <button
-          className="bg-green-500 text-white p-3 rounded-full shadow-lg"
-          onClick={() => setShowWhatsAppPopup((prev) => !prev)} // Toggle visibility
-        >
-          <FaWhatsapp size={24} />
-        </button>
-      </div>
-
-      {showWhatsAppPopup && (
-        <WhatsAppPopup
-          onClose={() => setShowWhatsAppPopup(false)}
-          whatsappNumber="1234567890" // Replace with your WhatsApp number
-          predefinedMessage={`Hello, I have a question about the product: ${stitchedProduct.stitchType}`} // Pass the predefined message
-        />
+      {/* Popup Icon for Add to Cart */}
+      {cart.length > 0 && (
+        <Link href="/cart">
+          <div className="fixed bottom-8 right-8 z-50 bg-orange-500 text-white rounded-full p-4 shadow-lg cursor-pointer">
+            <FaShoppingCart size={24} />
+            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
+              {totalItemsInCart}
+            </span>
+          </div>
+        </Link>
       )}
     </div>
   );
 };
 
-export default StitchingProductPage; 
+export default StitchingProductPage;

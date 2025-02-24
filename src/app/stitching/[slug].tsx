@@ -10,7 +10,7 @@ import Swal from "sweetalert2"; // Import SweetAlert2 for alerts
 import WhatsAppPopup from '../../components/WhatsAppPopup'; // Ensure this path is correct
 import ImageZoom from '../../components/ImageZoom'; // Ensure this path is correct
 import { FaWhatsapp } from 'react-icons/fa'; // Import social media icons
-// Import the stitched product query
+import { stitchedProductQuery } from '../../sanity/lib/queries'; // Import the stitched product query
 
 const StitchingProductPage = () => {
   const { slug } = useParams();
@@ -24,11 +24,10 @@ const StitchingProductPage = () => {
 
   useEffect(() => {
     const fetchStitchedProductDetails = async () => {
-      const query = `*[_type == "stitching" && slug.current == $slug][0]`;
       try {
-        const productDetails = await client.fetch(query, { slug });
-        setStitchedProduct(productDetails); 
-          setReviews(productDetails.reviews || []);
+        const productDetails = await client.fetch(stitchedProductQuery, { slug });
+        setStitchedProduct(productDetails);
+        setReviews(productDetails.reviews || []);
       } catch (error) {
         console.error("Error fetching stitched product details:", error);
       }

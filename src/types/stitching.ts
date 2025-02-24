@@ -44,5 +44,7 @@ export interface Stitching {
     reviews?: Review[];
     images: string[];
     description: string;
+    slug: { _type: 'slug'; current: string };
+    title: string;
 }
   

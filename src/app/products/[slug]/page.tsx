@@ -1,11 +1,12 @@
 "use client";
-import Swal from "sweetalert2";
+// import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import { client, urlFor } from "../../../sanity/lib/client";
 import { Product } from "../../../app/utils/types";
 import Image from "next/image";
 import { useCart } from "../../../app/context/cartContext"; // Import the useCart hook
+import Swal from "sweetalert2";
 
 const ProductDetailsPage = () => {
   const [product, setProduct] = useState<Product | null>(null);
@@ -43,11 +44,9 @@ const ProductDetailsPage = () => {
 
   const handleAddToCart = () => {
     if (!selectedSize) {
-      alert("Please select a size before adding to the cart!");
+      Swal.fire("Error", "Please select a size before adding to the cart!", "error");
       return;
     }
-
-    const originalPrice = selectedSizeData ? selectedSizeData.price : product.price;
 
     addToCart({
       ...product,
@@ -56,7 +55,7 @@ const ProductDetailsPage = () => {
       quantity,
     });
 
-    alert("Product added to cart!");
+    Swal.fire("Success", "Product added to cart!", "success");
   };
 
   return (
